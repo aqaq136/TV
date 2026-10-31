@@ -415,6 +415,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         @Override
         public void run() {
             updateGreeting();
+            if (premiumHome != null) premiumHome.refreshStatus();
             updatePanel();
             // The pill follows the network callbacks and each return to Home; only the festive light follows the
             // signal level, so only it needs this minute's binder calls (about 7 ms on the UI thread).
@@ -431,127 +432,10 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     private java.util.Map<Integer, String> homeHoldAppKeys = java.util.Collections.emptyMap();
 
 
-    /** ErokhinTV: installed-app favorites, with no dead shortcuts. */
-    private void setupErokhinPremium() {
-        android.widget.LinearLayout favorites = findViewById(R.id.erokhinFavorites);
-        if (favorites == null) return;
-        String[] pkgs = {"com.google.android.youtube.tv",
-                "com.vkontakte.android", "ru.kinopoisk", "ru.ivi.client", "ru.okko.androidtv", "ru.wink.tv"};
-        PackageManager pm = getPackageManager();
-        for (String pkg : pkgs) {
-            Intent launch = pm.getLeanbackLaunchIntentForPackage(pkg);
-            if (launch == null) launch = pm.getLaunchIntentForPackage(pkg);
-            if (launch == null) continue;
-            android.widget.TextView button = new android.widget.TextView(this);
-            String title;
-            try { title = pm.getApplicationLabel(pm.getApplicationInfo(pkg, 0)).toString(); }
-            catch (Exception ignored) { title = pkg.substring(pkg.lastIndexOf('.') + 1); }
-            button.setText(title);
-            button.setTextColor(Color.WHITE);
-            button.setTextSize(11);
-            button.setContentDescription(title);
-            try {
-                android.graphics.drawable.Drawable appIcon = pm.getApplicationIcon(pkg);
-                int iconSize = (int)(24 * density);
-                appIcon.setBounds(0, 0, iconSize, iconSize);
-                button.setCompoundDrawables(null, appIcon, null, null);
-                button.setCompoundDrawablePadding((int)(2 * density));
-            } catch (PackageManager.NameNotFoundException ignored) {}
-            button.setGravity(android.view.Gravity.CENTER);
-            button.setSingleLine(true);
-            button.setEllipsize(android.text.TextUtils.TruncateAt.END);
-            button.setPadding((int)(12*density),0,(int)(12*density),0);
-            button.setBackgroundResource(R.drawable.erokhin_focus_tile);
-            button.setId(View.generateViewId());
-            button.setFocusable(true);
-            button.setClickable(true);
-            android.widget.LinearLayout.LayoutParams lp = new android.widget.LinearLayout.LayoutParams((int)(82*density),(int)(48*density));
-            lp.setMargins((int)(4*density),0,(int)(4*density),0);
-            favorites.addView(button,lp);
-            button.setNextFocusUpId(R.id.grid);
-            button.setNextFocusDownId(R.id.erokhinMemory);
-            button.setOnKeyListener((v, code, event) -> {
-                if (event.getAction() != android.view.KeyEvent.ACTION_DOWN) return false;
-                if (code == android.view.KeyEvent.KEYCODE_DPAD_UP) {
-                    grid.requestFocus(); return true;
-                }
-                if (code == android.view.KeyEvent.KEYCODE_DPAD_DOWN) {
-                    findViewById(R.id.erokhinMemory).requestFocus(); return true;
-                }
-                return false;
-            });
-            final Intent target = launch;
-            button.setOnClickListener(v -> { try { startActivity(target); } catch (Exception ignored) {} });
-        }
-        android.widget.TextView add = new android.widget.TextView(this);
-        add.setId(View.generateViewId());
-        add.setText("+");
-        add.setContentDescription("Все приложения");
-        add.setTextSize(30);
-        add.setTextColor(Color.WHITE);
-        add.setGravity(android.view.Gravity.CENTER);
-        add.setFocusable(true);
-        add.setClickable(true);
-        add.setBackgroundResource(R.drawable.erokhin_focus_tile);
-        android.widget.LinearLayout.LayoutParams addParams = new android.widget.LinearLayout.LayoutParams(
-                (int)(64*density), (int)(48*density));
-        addParams.setMargins((int)(4*density), 0, (int)(4*density), 0);
-        favorites.addView(add, addParams);
-        add.setNextFocusUpId(R.id.grid);
-        add.setNextFocusDownId(R.id.erokhinMemory);
-        add.setOnClickListener(v -> onLibraryRequested());
-        int[] utilities = {R.id.erokhinStorage, R.id.erokhinMemory,
-                R.id.erokhinStartup, R.id.erokhinSystem};
-        for (int i = 0; i < utilities.length; i++) {
-            View utility = findViewById(utilities[i]);
-            utility.setNextFocusLeftId(utilities[Math.max(0, i - 1)]);
-            utility.setNextFocusRightId(utilities[Math.min(utilities.length - 1, i + 1)]);
-            utility.setNextFocusDownId(utilities[i]);
-            utility.setNextFocusUpId(add.getId());
-            utility.setOnFocusChangeListener((v, hasFocus) -> v.animate()
-                    .scaleX(hasFocus ? 1.035f : 1f).scaleY(hasFocus ? 1.035f : 1f)
-                    .setDuration(140).start());
-        }
-        findViewById(R.id.erokhinStorage).setOnClickListener(v -> {
-            try { startActivity(new Intent(android.provider.Settings.ACTION_INTERNAL_STORAGE_SETTINGS)); }
-            catch (android.content.ActivityNotFoundException ex) {
-                startActivity(new Intent(android.provider.Settings.ACTION_SETTINGS));
-            }
-        });
-        findViewById(R.id.erokhinStartup).setOnClickListener(v -> {
-            try { startActivity(new Intent(android.provider.Settings.ACTION_HOME_SETTINGS)); }
-            catch (android.content.ActivityNotFoundException ex) {
-                startActivity(new Intent(android.provider.Settings.ACTION_SETTINGS));
-            }
-        });
-        android.widget.TextView memory = findViewById(R.id.erokhinMemory);
-        android.app.ActivityManager memoryManager = (android.app.ActivityManager) getSystemService(ACTIVITY_SERVICE);
-        android.app.ActivityManager.MemoryInfo memoryInfo = new android.app.ActivityManager.MemoryInfo();
-        memoryManager.getMemoryInfo(memoryInfo);
-        memory.setText(String.format(java.util.Locale.getDefault(), "Память · %.1f ГБ", memoryInfo.availMem / (1024.0 * 1024 * 1024)));
+    private PremiumHome premiumHome;
 
-        memory.setOnClickListener(v -> {
-            android.app.ActivityManager am = (android.app.ActivityManager) getSystemService(ACTIVITY_SERVICE);
-            android.app.ActivityManager.MemoryInfo mi = new android.app.ActivityManager.MemoryInfo();
-            am.getMemoryInfo(mi);
-            long mb = 1024L*1024L;
-            new android.app.AlertDialog.Builder(this).setTitle("Оперативная память")
-                .setMessage("Доступно: " + (mi.availMem/mb) + " МБ\nВсего: " + (mi.totalMem/mb) + " МБ")
-                .setPositiveButton("OK",null).show();
-        });
-        memory.setBackgroundResource(R.drawable.erokhin_focus_tile);
-        memory.setOnKeyListener((v, code, event) -> {
-            if (event.getAction() == android.view.KeyEvent.ACTION_DOWN && code == android.view.KeyEvent.KEYCODE_DPAD_UP && favorites.getChildCount() > 0) {
-                favorites.getChildAt(0).requestFocus(); return true;
-            }
-            return false;
-        });
-        android.widget.TextView system = findViewById(R.id.erokhinSystem);
-        system.setBackgroundResource(R.drawable.erokhin_focus_tile);
-        system.setOnClickListener(v -> new android.app.AlertDialog.Builder(this)
-                .setTitle("ErokhinTV Premium")
-                .setMessage("Android " + android.os.Build.VERSION.RELEASE + "\nУстройство: " + android.os.Build.MODEL)
-                .setPositiveButton("OK",null).show());
+    private void setupErokhinPremium() {
+        premiumHome = new PremiumHome(this, () -> focusTile(lastFocused));
     }
 
     @Override
@@ -689,7 +573,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         lunar = cfg.lunarDate;
         lunarOffset = Lunar.offsetFor(cfg.lunarUtcOffset, Locale.getDefault());
         if (lunar) lunarDate.setVisibility(View.VISIBLE);
-        greetingName = cfg.greetingName;
+        greetingName = PremiumPreferences.get(this).getString("name", cfg.greetingName);
         if (cfg.dateBelowClock) moveDateBelowClock();
         if (cfg.dateBelowClock && cfg.iconOnlyButtons && !cfg.topMenu
                 && !getResources().getBoolean(R.bool.rtl_menu_bar)) {
@@ -1056,6 +940,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
                     .build(), vpnCallback);
         }
         // Not after recreate(): the launch intent survives it and would open the settings again.
+        premiumHome.applyAppearance();
         if (savedInstanceState == null && !openLauncherSettingsIfAsked(getIntent()) && !openLibraryIfAsked(getIntent())) {
             openInputsIfAsked(getIntent());
         }
@@ -1188,6 +1073,8 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             recreate();
             return;
         }
+        premiumHome.refreshFavorites();
+        premiumHome.refreshStatus();
         restartIdleClock();
         promptsPaused = false;
         if (grid.getAdapter() == null) grid.setAdapter(adapter);   // dropped by onTrimMemory
@@ -1204,6 +1091,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             default:
                 break;
         }
+        premiumHome.restoreFocusAfterLaunch();
         if (openLiveTvAfterBoot()) return;
         updateGreeting();
         updatePanel();
@@ -3896,6 +3784,13 @@ if (liveTvPkg.isEmpty()) return null;
         View panel = getLayoutInflater().inflate(R.layout.popup_inputs, root, false);
         LinearLayout rows = panel.findViewById(R.id.rows);
         PopupWindow popup = glassPopup(panel, (int) (200 * density));
+        boolean favorite = PremiumPreferences.favorites(this).contains(pkg);
+        addSettingsMenuRow(rows, popup, favorite ? R.string.premium_remove_favorite : R.string.premium_add_favorite, () -> {
+            if (!PremiumPreferences.toggleFavorite(this, pkg)) {
+                Toast.makeText(this, "В избранном уже 24 приложения", Toast.LENGTH_LONG).show();
+            }
+            premiumHome.refreshFavorites();
+        });
         if (dockRow && position < adapter.movableCount()) {
             boolean inDock = position < COLUMNS;
             addSettingsMenuRow(rows, popup, inDock ? R.string.tile_replace_in_dock : R.string.tile_add_to_dock,

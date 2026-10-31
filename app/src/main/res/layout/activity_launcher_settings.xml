@@ -21,6 +21,8 @@
             android:textColor="#FFFFFFFF"
             android:textSize="34sp" />
 
+        <TextView android:id="@+id/premiumSettingsChoice" style="@style/SettingsRow"
+            android:layout_marginTop="16dp" android:text="Оформление и избранное · ErokhinTV" />
         <TextView
             android:id="@+id/reorderChoice"
             style="@style/SettingsRow"

@@ -512,6 +512,7 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             h.icon.setVisibility(View.VISIBLE);
             h.label.setText(e.label);
             h.label.setVisibility(View.VISIBLE);
+            h.label.setTextSize(PremiumPreferences.get(ctx).getBoolean("large_text", false) ? 16 : 13);
         }
         h.card.setOnClickListener(v -> launch(e));
         h.card.setOnLongClickListener(v -> {
