@@ -39,7 +39,7 @@ public final class PremiumSettingsActivity extends ToolsActivityBase {
         rows = new LinearLayout(this); rows.setOrientation(LinearLayout.VERTICAL);
         rows.setPadding(dp(48), dp(24), dp(48), dp(24));
         scroll.addView(rows); setContentView(scroll);
-        title("ErokhinTV · Персонализация", 28);
+        title("MetoxTV · Персонализация", 28);
         title("Изменения сохраняются автоматически. Вернитесь кнопкой «Назад».", 14);
         row("Инструменты: APK, погода, сеть, звуки", () -> startActivity(new Intent(this, LauncherToolsActivity.class)));
         row("Избранное — выбрать приложения", this::editFavorites);
@@ -70,7 +70,7 @@ public final class PremiumSettingsActivity extends ToolsActivityBase {
         row("Bluetooth", () -> open(new Intent(Settings.ACTION_BLUETOOTH_SETTINGS)));
         row("Системные настройки", () -> open(new Intent(Settings.ACTION_SETTINGS)));
         row("Скачать обновление с GitHub", () -> open(new Intent(Intent.ACTION_VIEW,
-                Uri.parse("https://github.com/aqaq136/TV/tree/erokhintv-premium/downloads"))));
+                Uri.parse("https://github.com/aqaq136/TV/tree/metoxtv/downloads"))));
         title("Плитки: удерживайте OK, чтобы переместить или добавить в избранное.\nИзбранное: удерживайте OK, чтобы изменить порядок или убрать ярлык.\nРазмер плиток, часы и анимации — в предыдущем экране настроек.", 14);
         row("Сбросить персонализацию", () -> new LauncherDialogBuilder(this).setTitle("Сбросить персонализацию?")
                 .setMessage("Будут сброшены избранное, имя, тема и отступы. Установленные приложения и порядок основных плиток сохранятся.")

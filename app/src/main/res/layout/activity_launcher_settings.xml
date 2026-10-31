@@ -24,7 +24,7 @@
         <TextView android:id="@+id/launcherToolsChoice" style="@style/SettingsRow"
             android:layout_marginTop="16dp" android:text="Инструменты · APK, погода, сеть, диагностика" />
         <TextView android:id="@+id/premiumSettingsChoice" style="@style/SettingsRow"
-            android:layout_marginTop="16dp" android:text="Оформление и избранное · ErokhinTV" />
+            android:layout_marginTop="16dp" android:text="Оформление и избранное · MetoxTV" />
         <TextView
             android:id="@+id/reorderChoice"
             style="@style/SettingsRow"

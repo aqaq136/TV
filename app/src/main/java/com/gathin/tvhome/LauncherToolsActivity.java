@@ -35,7 +35,7 @@ public final class LauncherToolsActivity extends ToolsActivityBase {
         ScrollView scroll = new ScrollView(this); scroll.setBackgroundColor(0xFF080F25);
         LinearLayout rows = new LinearLayout(this); rows.setOrientation(LinearLayout.VERTICAL); rows.setPadding(dp(40), dp(20), dp(40), dp(24));
         scroll.addView(rows); setContentView(scroll);
-        TextView title = new TextView(this); title.setText("ErokhinTV · Инструменты"); title.setTextColor(Color.WHITE); title.setTextSize(28); rows.addView(title);
+        TextView title = new TextView(this); title.setText("MetoxTV · Инструменты"); title.setTextColor(Color.WHITE); title.setTextSize(28); rows.addView(title);
         status = new TextView(this); status.setTextColor(0xFFC2DAFF); status.setTextSize(16); status.setPadding(0, dp(12), 0, dp(16));
         status.setText("Выберите действие. Онлайн-проверки запускаются только по вашему запросу."); rows.addView(status);
         row(rows, "Установить APK с флешки", this::pickApk);
@@ -258,7 +258,7 @@ public final class LauncherToolsActivity extends ToolsActivityBase {
         try { version = getPackageManager().getPackageInfo(getPackageName(), 0).versionName; } catch (PackageManager.NameNotFoundException ignored) {}
         android.os.StatFs fs = new android.os.StatFs(getFilesDir().getAbsolutePath());
         android.util.DisplayMetrics dm = getResources().getDisplayMetrics();
-        return "ErokhinTV diagnostic report\nTime: " + new Date() + "\nVersion: " + version + "\nPackage: " + getPackageName()
+        return "MetoxTV diagnostic report\nTime: " + new Date() + "\nVersion: " + version + "\nPackage: " + getPackageName()
                 + "\nManufacturer: " + android.os.Build.MANUFACTURER + "\nModel: " + android.os.Build.MODEL + "\nAndroid: " + android.os.Build.VERSION.RELEASE
                 + " (API " + android.os.Build.VERSION.SDK_INT + ")\nDisplay: " + dm.widthPixels + "x" + dm.heightPixels + " density=" + dm.density
                 + "\nFree storage: " + fs.getAvailableBytes() / 1048576 + " MB\nTile shape: " + PremiumPreferences.get(this).getString("tile_shape", "wide")
@@ -269,7 +269,7 @@ public final class LauncherToolsActivity extends ToolsActivityBase {
         new LauncherDialogBuilder(this).setTitle("Диагностика").setMessage(report)
                 .setPositiveButton("Сохранить TXT", (d, w) -> {
                     try { startActivityForResult(new Intent(Intent.ACTION_CREATE_DOCUMENT).addCategory(Intent.CATEGORY_OPENABLE)
-                            .setType("text/plain").putExtra(Intent.EXTRA_TITLE, "ErokhinTV-diagnostics.txt"), SAVE_REPORT); }
+                            .setType("text/plain").putExtra(Intent.EXTRA_TITLE, "MetoxTV-diagnostics.txt"), SAVE_REPORT); }
                     catch (ActivityNotFoundException e) { message("В прошивке нет сохранения файлов. Используйте «Поделиться» или фотографию отчёта."); }
                 }).setNeutralButton("Поделиться", (d, w) -> {
                     try { startActivity(Intent.createChooser(new Intent(Intent.ACTION_SEND).setType("text/plain").putExtra(Intent.EXTRA_TEXT, report), "Отправить отчёт")); }

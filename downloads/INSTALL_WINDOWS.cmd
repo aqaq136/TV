@@ -11,8 +11,8 @@ if errorlevel 1 (
 )
 echo Connected devices:
 "%ADB%" devices
-echo Installing ErokhinTV Premium 3.4 without deleting settings...
-"%ADB%" install -r "ErokhinTV_Premium_Interface.apk"
+echo Installing MetoxTV 3.4.1 without deleting settings...
+"%ADB%" install -r "MetoxTV.apk"
 if errorlevel 1 (
  echo Installation failed. See INSTALL_RU.txt. Signature conflicts require a manual decision.
  echo This script has NOT removed the installed launcher.

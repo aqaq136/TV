@@ -17,7 +17,7 @@ final class ToolNetwork implements AutoCloseable {
         c.setConnectTimeout(8000); c.setReadTimeout(8000); c.setUseCaches(false);
         c.setInstanceFollowRedirects(false);
         c.setRequestProperty("Accept-Encoding", "identity");
-        c.setRequestProperty("User-Agent", "ErokhinTV/3.4");
+        c.setRequestProperty("User-Agent", "MetoxTV/3.4.1");
         return c;
     }
     String json(String address) throws Exception {
