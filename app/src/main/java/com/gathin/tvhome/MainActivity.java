@@ -666,8 +666,15 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             public void onChildViewDetachedFromWindow(@NonNull View v) {
             }
         });
-        if (dockRow) grid.addItemDecoration(new DockDecoration(COLUMNS, density, cinematic, cfg.alwaysShowNames, cfg.dockOpacity, cfg.dockGlass, cfg.dockEvenPadding, cfg.dockBand,
-                singleRow, cfg.dockBandAll));
+        // Premium uses one stationary panel behind the entire scrolling app viewport. The dock
+        // decoration still supplies its spacing, but must not paint a second band on the first row.
+        View appsPanel = findViewById(R.id.premiumAppsPanel);
+        if (appsPanel != null && cfg.dockBand) {
+            appsPanel.setBackgroundResource(R.drawable.glass_panel);
+            appsPanel.getBackground().mutate().setAlpha(Math.round(cfg.dockOpacity * 255f / 100f));
+        }
+        if (dockRow) grid.addItemDecoration(new DockDecoration(COLUMNS, density, cinematic, cfg.alwaysShowNames, cfg.dockOpacity, cfg.dockGlass, cfg.dockEvenPadding,
+                cfg.dockBand && appsPanel == null, singleRow, cfg.dockBandAll));
         if (cfg.fadeRows) TopFade.attach(grid, 48 * density);
         // Reduced motion: the tiles are simply there, with no entrance (reloadApps skips it there too).
         if (animations && !reducedMotion) {
