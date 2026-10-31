@@ -1,0 +1,16 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace 'ru.sbertv.efirtv'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId 'ru.sbertv.efirtv'
+        minSdk 23
+        targetSdk 28
+        versionCode 1
+        versionName '1.0'
+    }
+}
