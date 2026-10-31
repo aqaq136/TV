@@ -415,7 +415,7 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         float density = parent.getResources().getDisplayMetrics().density;
         int width = parent.getWidth() > 0 ? parent.getWidth() : parent.getMeasuredWidth();
         int inner = width - parent.getPaddingLeft() - parent.getPaddingRight();
-        int w = tileWidthPx(inner, parent.getHeight(), dockSize, rowsBelowDock, dockTitle, dockRow, density), h = tileHeightPx(w);
+        int w = tileWidthPx(inner, parent.getHeight(), dockSize, rowsBelowDock, dockTitle, dockRow, density), h = TileShape.height(w, PremiumPreferences.get(ctx).getString("tile_shape", "wide"));
         View card = v.findViewById(R.id.card);
         ViewGroup.LayoutParams cardLp = card.getLayoutParams();
         cardLp.width = w;
@@ -438,9 +438,23 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             // tvOS-style tile: a large centred mark, no caption inside the card.
             View icon = v.findViewById(R.id.icon);
             FrameLayout.LayoutParams iconLp = (FrameLayout.LayoutParams) icon.getLayoutParams();
-            iconLp.width = iconLp.height = Math.round(h * 0.46f);
+            iconLp.width = iconLp.height = Math.round(h * ("compact".equals(PremiumPreferences.get(ctx).getString("tile_shape", "wide")) ? 0.38f : 0.46f));
             iconLp.bottomMargin = Math.round(h * 0.17f);
             icon.setLayoutParams(iconLp);
+            if ("compact".equals(PremiumPreferences.get(ctx).getString("tile_shape", "wide"))) {
+                // A low tile uses a horizontal icon and caption, so large text never overlaps the mark.
+                iconLp.width = iconLp.height = Math.round(Math.min(28f * density, h * 0.55f));
+                iconLp.gravity = android.view.Gravity.LEFT | android.view.Gravity.CENTER_VERTICAL;
+                iconLp.leftMargin = Math.round(8f * density);
+                iconLp.bottomMargin = 0;
+                icon.setLayoutParams(iconLp);
+                TextView label = v.findViewById(R.id.label);
+                FrameLayout.LayoutParams caption = (FrameLayout.LayoutParams) label.getLayoutParams();
+                caption.gravity = android.view.Gravity.CENTER_VERTICAL;
+                label.setLayoutParams(caption);
+                label.setGravity(android.view.Gravity.CENTER_VERTICAL);
+                label.setPadding(iconLp.width + Math.round(16f * density), 0, Math.round(6f * density), 0);
+            }
         } else if (h < Math.round(DESIGN_H_DP * density)) {
             // Shrunk tiles (e.g. 5 or 6 columns): scale icon and bottom margin proportionally with tile height so the label does not overlap the icon.
             View icon = v.findViewById(R.id.icon);

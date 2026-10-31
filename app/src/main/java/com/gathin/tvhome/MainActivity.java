@@ -433,6 +433,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
 
 
     private PremiumHome premiumHome;
+    private LauncherSounds launcherSounds;
 
     private void setupErokhinPremium() {
         premiumHome = new PremiumHome(this, () -> focusTile(lastFocused));
@@ -696,7 +697,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             // Item height follows the tile size, which follows the columns and the rows that must fit (AppAdapter.tileWidthPx).
             int inner = (r - l) - grid.getPaddingLeft() - grid.getPaddingRight();
             int tileW = AppAdapter.tileWidthPx(inner, h, COLUMNS, rowsBelowDock, cfg.dockTitle, cfg.dockRow, density);
-            int itemH = AppAdapter.itemHeightPx(AppAdapter.tileHeightPx(tileW), density);
+            int itemH = AppAdapter.itemHeightPx(TileShape.height(tileW, PremiumPreferences.get(this).getString("tile_shape", "wide")), density);
             int dockRow = itemH + (int) (AppAdapter.DOCK_EXTRA_DP * density);   // item height plus DockDecoration offsets
             int gridRows = itemH * rowsBelowDock;
             // Keep the hero below the header when the library is enabled on a short screen,
@@ -1080,6 +1081,9 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             recreate();
             return;
         }
+        if (launcherSounds != null) launcherSounds.close();
+        launcherSounds = new LauncherSounds(this);
+        LauncherSounds.muteNative(getWindow().getDecorView());
         premiumHome.refreshFavorites();
         premiumHome.refreshStatus();
         restartIdleClock();
@@ -1282,6 +1286,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
 
     @Override
     protected void onPause() {
+        if (launcherSounds != null) { launcherSounds.close(); launcherSounds = null; }
         super.onPause();
         resumed = false;
         // No UP reaches a paused Home, so a vendor-key hold it saw go down would still open its app later.
@@ -1402,6 +1407,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
      */
     @Override
     public boolean dispatchKeyEvent(KeyEvent event) {
+        if (launcherSounds != null) launcherSounds.key(event);
         // Vendor keys (TCL Netflix button, 4062) never reach the key services, only the focused window, so their
         // "hold:" entries run here too or nowhere. Only while resumed: onPause releases Home's holds, and a DOWN
         // taken after that would arm one nothing releases.
@@ -3567,6 +3573,7 @@ if (liveTvPkg.isEmpty()) return null;
     }
 
     private PopupWindow glassPopup(View panel, int width) {
+        LauncherSounds.muteNative(panel);
         final PopupWindow popup = new PopupWindow(panel, width, ViewGroup.LayoutParams.WRAP_CONTENT, true);
         popup.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));   // needed for Back to dismiss
         popup.setOutsideTouchable(true);
@@ -3815,6 +3822,7 @@ if (liveTvPkg.isEmpty()) return null;
             if (LibraryApps.save(this, pkg, false)) reloadApps(false);
             else Toast.makeText(this, R.string.library_save_failed, Toast.LENGTH_LONG).show();
         });
+        addSettingsMenuRow(rows, popup, R.string.premium_uninstall, () -> LauncherToolsActivity.confirmUninstall(this, pkg));
         // Some firmware has no App info page at all; a row that only toasts "can't open" helps nobody.
         Intent info = SystemSettings.appInfo(this, pkg);
         if (info != null) addSettingsMenuRow(rows, popup, R.string.library_app_info, () -> open(info));

@@ -20,7 +20,7 @@ import java.util.Collections;
 import java.util.List;
 
 /** Remote-friendly settings owned by the launcher; system settings stay one row away. */
-public final class LauncherSettingsActivity extends Activity {
+public final class LauncherSettingsActivity extends ToolsActivityBase {
     @Override
     protected void attachBaseContext(android.content.Context base) {
         super.attachBaseContext(LauncherLocale.wrap(base));   // locale
@@ -50,6 +50,7 @@ public final class LauncherSettingsActivity extends Activity {
     protected void onCreate(Bundle state) {
         super.onCreate(state);
         setContentView(R.layout.activity_launcher_settings);
+        findViewById(R.id.launcherToolsChoice).setOnClickListener(v -> startActivity(new Intent(this, LauncherToolsActivity.class)));
         findViewById(R.id.premiumSettingsChoice).setOnClickListener(v -> startActivity(new Intent(this, PremiumSettingsActivity.class)));
         choices = getSharedPreferences(Config.SETTINGS_NAME, MODE_PRIVATE);
         Config config = Config.load(this);
@@ -140,7 +141,7 @@ public final class LauncherSettingsActivity extends Activity {
             if (advancedEffects) {
                 setAdvanced(false);
             } else {
-                new AlertDialog.Builder(this)
+                new LauncherDialogBuilder(this)
                         .setTitle(R.string.advanced_effects)
                         .setMessage(R.string.advanced_effects_warning)
                         .setPositiveButton(R.string.enable, (dialog, which) -> setAdvanced(true))
@@ -197,7 +198,7 @@ public final class LauncherSettingsActivity extends Activity {
         String current = choices.getString(Config.WALLPAPER_CHOICE_KEY, null);
         int checked = "none".equals(current) ? images.size()
                 : indexOf(images, current);
-        new AlertDialog.Builder(this)
+        new LauncherDialogBuilder(this)
                 .setTitle(R.string.wallpaper_label)
                 .setSingleChoiceItems(labels, checked, (dialog, which) -> {
                     dialog.dismiss();
@@ -241,7 +242,7 @@ public final class LauncherSettingsActivity extends Activity {
             labels[i + 1] = apps.get(i)[0];
             if (apps.get(i)[1].equals(current)) checked = i + 1;
         }
-        new AlertDialog.Builder(this)
+        new LauncherDialogBuilder(this)
                 .setTitle(R.string.open_on_start_label)
                 .setSingleChoiceItems(labels, checked, (dialog, which) -> {
                     dialog.dismiss();

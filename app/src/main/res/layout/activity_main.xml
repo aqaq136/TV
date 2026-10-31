@@ -401,7 +401,7 @@
                     android:textAllCaps="false" />
 
             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:text="Ваши приложения и развлечения" android:textColor="#B5C7E5" android:textSize="17sp"/>
+                android:id="@+id/premiumSubtitle" android:text="Ваши приложения и развлечения" android:textColor="#B5C7E5" android:textSize="17sp"/>
         </LinearLayout>
         <!-- The wrapper clips at the grid's edge; the grid itself must not clip so scaled tiles can overflow their cells. -->
         <FrameLayout
@@ -445,7 +445,7 @@
             <TextView android:id="@+id/erokhinStartup" style="@style/PremiumUtility"
                 android:text="Домашний экран" android:drawableStart="@drawable/ic_home_settings"/>
             <TextView android:id="@+id/erokhinSystem" style="@style/PremiumUtility"
-                android:text="О системе" android:drawableStart="@drawable/ic_settings"/>
+                android:text="Инструменты" android:drawableStart="@drawable/ic_settings"/>
         </LinearLayout>
     </LinearLayout>
 

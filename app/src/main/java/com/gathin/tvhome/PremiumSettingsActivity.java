@@ -27,7 +27,7 @@ import java.util.List;
 import java.util.Map;
 
 /** Native, remote-accessible personalization. No network or storage permissions required. */
-public final class PremiumSettingsActivity extends Activity {
+public final class PremiumSettingsActivity extends ToolsActivityBase {
     private static final int WALLPAPER = 71;
     private LinearLayout rows;
     private SharedPreferences prefs;
@@ -41,9 +41,10 @@ public final class PremiumSettingsActivity extends Activity {
         scroll.addView(rows); setContentView(scroll);
         title("ErokhinTV · Персонализация", 28);
         title("Изменения сохраняются автоматически. Вернитесь кнопкой «Назад».", 14);
+        row("Инструменты: APK, погода, сеть, звуки", () -> startActivity(new Intent(this, LauncherToolsActivity.class)));
         row("Избранное — выбрать приложения", this::editFavorites);
         row("Имя в приветствии", this::editName);
-        row("Цветовая тема", () -> new AlertDialog.Builder(this).setTitle("Цветовая тема")
+        row("Цветовая тема", () -> new LauncherDialogBuilder(this).setTitle("Цветовая тема")
                 .setSingleChoiceItems(new String[]{"Неон · голубой и фиолетовый", "Аврора · бирюзовый", "Спокойная · приглушённые волны"},
                         java.util.Arrays.asList("neon", "aurora", "calm").indexOf(prefs.getString("theme", "neon")), (d, which) -> {
                             prefs.edit().putString("theme", new String[]{"neon", "aurora", "calm"}[which]).putBoolean("custom_wallpaper", false).apply();
@@ -57,7 +58,7 @@ public final class PremiumSettingsActivity extends Activity {
         row("Убрать свои обои", () -> { prefs.edit().putBoolean("custom_wallpaper", false).apply(); changed(); message("Выбрана встроенная тема"); });
         row("Отступы от краёв экрана", () -> {
             int selected = prefs.getInt("safe_area", 0) / 12;
-            new AlertDialog.Builder(this).setTitle("Если телевизор обрезает края")
+            new LauncherDialogBuilder(this).setTitle("Если телевизор обрезает края")
                     .setSingleChoiceItems(new String[]{"Обычные", "Увеличенные", "Максимальные"}, Math.max(0, Math.min(2, selected)), (d, which) -> {
                         prefs.edit().putInt("safe_area", which * 12).apply(); changed(); d.dismiss();
                     }).setNegativeButton("Отмена", null).show();
@@ -71,7 +72,7 @@ public final class PremiumSettingsActivity extends Activity {
         row("Скачать обновление с GitHub", () -> open(new Intent(Intent.ACTION_VIEW,
                 Uri.parse("https://github.com/aqaq136/TV/tree/erokhintv-premium/downloads"))));
         title("Плитки: удерживайте OK, чтобы переместить или добавить в избранное.\nИзбранное: удерживайте OK, чтобы изменить порядок или убрать ярлык.\nРазмер плиток, часы и анимации — в предыдущем экране настроек.", 14);
-        row("Сбросить персонализацию", () -> new AlertDialog.Builder(this).setTitle("Сбросить персонализацию?")
+        row("Сбросить персонализацию", () -> new LauncherDialogBuilder(this).setTitle("Сбросить персонализацию?")
                 .setMessage("Будут сброшены избранное, имя, тема и отступы. Установленные приложения и порядок основных плиток сохранятся.")
                 .setPositiveButton("Сбросить", (d, w) -> { prefs.edit().clear().apply(); changed(); updateLargeLabel(large); message("Персонализация сброшена"); })
                 .setNegativeButton("Отмена", null).show());
@@ -100,7 +101,7 @@ public final class PremiumSettingsActivity extends Activity {
     private void editName() {
         EditText field = new EditText(this); field.setSingleLine(true); field.setText(prefs.getString("name", ""));
         field.setHint("Например, Александр"); field.setFilters(new android.text.InputFilter[]{new android.text.InputFilter.LengthFilter(32)});
-        new AlertDialog.Builder(this).setTitle("Имя в приветствии").setView(field)
+        new LauncherDialogBuilder(this).setTitle("Имя в приветствии").setView(field)
                 .setPositiveButton("Сохранить", (d, w) -> { prefs.edit().putString("name", field.getText().toString().trim()).apply(); changed(); })
                 .setNeutralButton("Без имени", (d, w) -> { prefs.edit().remove("name").apply(); changed(); })
                 .setNegativeButton("Отмена", null).show();
@@ -121,7 +122,7 @@ public final class PremiumSettingsActivity extends Activity {
         selected.retainAll(packages);
         String[] labels = new String[packages.size()]; boolean[] checked = new boolean[packages.size()];
         for (int i = 0; i < packages.size(); i++) { labels[i] = installed.get(packages.get(i)); checked[i] = selected.contains(packages.get(i)); }
-        new AlertDialog.Builder(this).setTitle("Избранное · до " + FavoriteOrder.LIMIT + " приложений")
+        new LauncherDialogBuilder(this).setTitle("Избранное · до " + FavoriteOrder.LIMIT + " приложений")
                 .setMultiChoiceItems(labels, checked, (d, which, on) -> {
                     String pkg = packages.get(which);
                     if (on && !selected.contains(pkg)) selected.add(pkg); else if (!on) selected.remove(pkg);

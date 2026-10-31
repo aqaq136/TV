@@ -160,6 +160,7 @@ final class AppLibraryDialog {
         this.excludedApps = excludedApps;
         density = activity.getResources().getDisplayMetrics().density;
         panel = new LinearLayout(activity);
+        LauncherSounds.muteNative(panel);
         panel.setLayoutDirection(rtl ? View.LAYOUT_DIRECTION_RTL : View.LAYOUT_DIRECTION_LTR);
         panel.setOrientation(LinearLayout.VERTICAL);
         panel.setPadding(dp(12), dp(8), dp(12), dp(12));
@@ -524,6 +525,7 @@ final class AppLibraryDialog {
         String pkg = selectedPackage;
         if (spring != null) spring.cancel();
         View menuPanel = activity.getLayoutInflater().inflate(R.layout.popup_inputs, panel, false);
+        LauncherSounds.muteNative(menuPanel);
         LinearLayout rows = menuPanel.findViewById(R.id.rows);
         PopupWindow menu = new PopupWindow(menuPanel, dp(220), ViewGroup.LayoutParams.WRAP_CONTENT, true);
         actionPopup = menu;

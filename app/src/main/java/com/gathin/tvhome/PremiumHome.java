@@ -54,17 +54,13 @@ final class PremiumHome {
         activity.findViewById(R.id.erokhinStartup).setOnClickListener(v -> open(Settings.ACTION_HOME_SETTINGS));
         activity.findViewById(R.id.erokhinMemory).setOnClickListener(v -> {
             ActivityManager.MemoryInfo info = memory();
-            new AlertDialog.Builder(activity).setTitle("Оперативная память")
+            new LauncherDialogBuilder(activity).setTitle("Оперативная память")
                     .setMessage(String.format(Locale.getDefault(), "Доступно: %.1f ГБ\nВсего: %.1f ГБ\n\nAndroid управляет памятью автоматически.",
                             info.availMem / 1073741824.0, info.totalMem / 1073741824.0))
                     .setPositiveButton("Понятно", null).show();
         });
-        activity.findViewById(R.id.erokhinSystem).setOnClickListener(v -> new AlertDialog.Builder(activity)
-                .setTitle("ErokhinTV Premium " + version())
-                .setMessage("Android " + android.os.Build.VERSION.RELEASE + "\nУстройство: " + android.os.Build.MODEL
-                        + "\n\nУдерживайте OK на плитке для перестановки или добавления в избранное.")
-                .setPositiveButton("Настройки лаунчера", (d, w) -> activity.startActivity(new Intent(activity, LauncherSettingsActivity.class)))
-                .setNegativeButton("Закрыть", null).show());
+        activity.findViewById(R.id.erokhinSystem).setOnClickListener(v ->
+                activity.startActivity(new Intent(activity, LauncherToolsActivity.class)));
         refreshFavorites();
     }
     private int dp(float value) { return Math.round(value * density); }
@@ -112,7 +108,7 @@ final class PremiumHome {
                     catch (ActivityNotFoundException | SecurityException e) { message("Не удалось открыть приложение. Проверьте, установлено ли оно."); refreshFavorites(); }
                 });
                 button.setOnLongClickListener(v -> {
-                    new AlertDialog.Builder(activity).setTitle(button.getContentDescription())
+                    new LauncherDialogBuilder(activity).setTitle(button.getContentDescription())
                             .setItems(new String[]{"Переместить влево", "Переместить вправо", "Убрать из избранного"}, (d, which) -> {
                                 List<String> list = PremiumPreferences.favorites(activity);
                                 if (which == 2) list.remove(pkg);
@@ -179,6 +175,18 @@ final class PremiumHome {
     void refreshStatus() {
         if (favorites == null) return;
         ((TextView) activity.findViewById(R.id.erokhinMemory)).setText(String.format(Locale.getDefault(), "ОЗУ · %.1f ГБ", memory().availMem / 1073741824.0));
+        TextView subtitle = activity.findViewById(R.id.premiumSubtitle);
+        if (subtitle != null) {
+            android.content.SharedPreferences prefs = PremiumPreferences.get(activity);
+            String weather = prefs.getString("weather_summary", "");
+            long time = prefs.getLong("weather_time", 0);
+            if (!weather.isEmpty()) {
+                String city = prefs.getString("weather_city", "").split(",")[0];
+                String saved = android.text.format.DateFormat.format("dd.MM HH:mm", time).toString();
+                subtitle.setText(city + " · " + weather + " · " + saved);
+                subtitle.setTextSize(13); subtitle.setMaxLines(2);
+            } else { subtitle.setText("Ваши приложения и развлечения"); subtitle.setTextSize(17); }
+        }
         StatFs storage = new StatFs(activity.getFilesDir().getAbsolutePath());
         ((TextView) activity.findViewById(R.id.erokhinStorage)).setText(String.format(Locale.getDefault(), "Свободно · %.1f ГБ", storage.getAvailableBytes() / 1073741824.0));
     }
