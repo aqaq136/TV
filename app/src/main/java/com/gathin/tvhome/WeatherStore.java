@@ -39,7 +39,7 @@ final class WeatherStore {
         String age = WeatherPolicy.stale(System.currentTimeMillis(), time) ? "Устарело · " : "";
         String saved = android.text.format.DateFormat.format("dd.MM HH:mm", time).toString();
         if (!detail) return city + " · " + weather.split(" · ")[0] + "\n" + source + " · " + age + saved + (error.isEmpty() ? "" : " · сбой");
-        return city + " · " + weather + "\n" + source + " · " + age + saved
+        return city + " · " + weather + "\nПолучено: " + age + saved
                 + (error.isEmpty() ? "" : detail ? "\n" + error : " · ошибка обновления");
     }
 }

@@ -122,7 +122,8 @@ public class VisualHomeTest {
         Activity cached = start(WeatherActivity.class);
         instrumentation.runOnMainSync(() -> {
             String text = ((android.widget.TextView)cached.findViewById(R.id.weatherStatus)).getText().toString();
-            assertTrue(text.contains("Тестовый город")); assertTrue(text.contains("Яндекс Погода"));
+            assertTrue(text.contains("Тестовый город"));
+            assertTrue(((android.widget.TextView)cached.findViewById(R.id.weatherSource)).getText().toString().contains("Яндекс Погода"));
             assertTrue(text.contains("+20 °C"));
         });
         SystemClock.sleep(650); screenshot("weather-cached-fixture");
