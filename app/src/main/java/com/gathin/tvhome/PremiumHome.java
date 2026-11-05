@@ -28,10 +28,13 @@ final class PremiumHome {
     private String focusedPackage;
     private boolean restoreAfterLaunch;
     private final LinearLayout favorites;
+    private final VisualDashboard dashboard;
 
     PremiumHome(Activity activity, Runnable returnToGrid) {
         this.activity = activity;
         this.returnToGrid = returnToGrid;
+        VisualPreferences.migrate(activity);
+        dashboard = new VisualDashboard(activity, returnToGrid);
         density = activity.getResources().getDisplayMetrics().density;
         animations = Config.load(activity).animations;
         favorites = activity.findViewById(R.id.erokhinFavorites);
@@ -39,6 +42,12 @@ final class PremiumHome {
         int[] ids = {R.id.erokhinStorage, R.id.erokhinMemory, R.id.erokhinStartup, R.id.erokhinSystem};
         for (int i = 0; i < ids.length; i++) {
             View v = activity.findViewById(ids[i]);
+            TextView utility = (TextView) v;
+            Drawable[] marks = utility.getCompoundDrawablesRelative();
+            for (Drawable mark : marks) if (mark != null) mark.setBounds(0, 0, dp(18), dp(18));
+            utility.setCompoundDrawablesRelative(marks[0], marks[1], marks[2], marks[3]);
+            v.setBackground(new PrismSurfaceDrawable(VisualPalette.of(PremiumPreferences.get(activity).getString("visual_palette", "cosmos")).primary,
+                    density, dp(10), "glass"));
             v.setNextFocusLeftId(ids[Math.max(0, i - 1)]);
             v.setNextFocusRightId(ids[Math.min(ids.length - 1, i + 1)]);
             v.setNextFocusDownId(ids[i]);
@@ -84,6 +93,10 @@ final class PremiumHome {
                     .setDuration(animate ? 140 : 0).start();
         });
     }
+    void resume() { dashboard.resume(); }
+    void pause() { dashboard.pause(); }
+    void close() { dashboard.close(); }
+    void focused(String label, String pkg, Drawable icon, int accent, View tile) { dashboard.focused(label, pkg, icon, accent, tile); }
     void refreshFavorites() {
         if (favorites == null) return;
         View previous = activity.getCurrentFocus();
@@ -100,7 +113,7 @@ final class PremiumHome {
                 Drawable icon = pm.getApplicationIcon(pkg);
                 icon.setBounds(0, 0, dp(24), dp(24));
                 button.setCompoundDrawables(null, icon, null, null);
-                button.setCompoundDrawablePadding(dp(2));
+                button.setCompoundDrawablePadding(dp(1));
                 Intent target = launch;
                 button.setOnClickListener(v -> {
                     focusedPackage = pkg;
@@ -142,8 +155,9 @@ final class PremiumHome {
         b.setText(label); b.setContentDescription(label); b.setTextColor(Color.WHITE); b.setTextSize(11);
         b.setSingleLine(true); b.setEllipsize(android.text.TextUtils.TruncateAt.END);
         b.setGravity(Gravity.CENTER); b.setPadding(dp(8), 0, dp(8), 0);
-        b.setBackgroundResource(R.drawable.erokhin_focus_tile); b.setFocusable(true); b.setClickable(true);
-        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(dp(width), dp(48));
+        b.setBackground(new PrismSurfaceDrawable(VisualPalette.of(PremiumPreferences.get(activity).getString("visual_palette", "cosmos")).primary,
+                density, dp(10), "glass")); b.setFocusable(true); b.setClickable(true);
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(dp(width), dp(44));
         lp.setMargins(dp(4), 0, dp(4), 0); favorites.addView(b, lp);
         decorate(b);
         b.setOnKeyListener((v, code, event) -> {
@@ -184,31 +198,33 @@ final class PremiumHome {
                 String city = prefs.getString("weather_city", "").split(",")[0];
                 String saved = android.text.format.DateFormat.format("dd.MM HH:mm", time).toString();
                 subtitle.setText(city + " · " + weather + " · " + saved);
-                subtitle.setTextSize(13); subtitle.setMaxLines(2);
-            } else { subtitle.setText("Ваши приложения и развлечения"); subtitle.setTextSize(17); }
+                subtitle.setTextSize(10); subtitle.setMaxLines(2);
+            } else { subtitle.setText(R.string.visual_weather_choose); subtitle.setTextSize(11); }
         }
         StatFs storage = new StatFs(activity.getFilesDir().getAbsolutePath());
         ((TextView) activity.findViewById(R.id.erokhinStorage)).setText(String.format(Locale.getDefault(), "Свободно · %.1f ГБ", storage.getAvailableBytes() / 1073741824.0));
+        dashboard.refreshStatus();
     }
     void applyAppearance() {
         View content = activity.findViewById(R.id.premiumContent);
         if (content == null) return;
         android.content.SharedPreferences prefs = PremiumPreferences.get(activity);
         int safe = prefs.getInt("safe_area", 0);
-        content.setPadding(dp(32 + safe), dp(16 + safe / 2f), dp(32 + safe), dp(16 + safe / 2f));
-        ((TextView) activity.findViewById(R.id.greeting)).setTextSize(prefs.getBoolean("large_text", false) ? 32 : 28);
+        content.setPadding(dp(28 + safe), dp(14 + safe / 2f), dp(28 + safe), dp(14 + safe / 2f));
+        ((TextView) activity.findViewById(R.id.greeting)).setTextSize(prefs.getBoolean("large_text", false) ? 19 : 16);
         View root = activity.findViewById(R.id.root);
         String theme = prefs.getString("theme", "neon");
-        root.setBackgroundResource("aurora".equals(theme) ? R.drawable.premium_aurora
-                : "calm".equals(theme) ? R.drawable.premium_calm : R.drawable.premium_waves);
+        root.setBackgroundColor(VisualPalette.of(prefs.getString("visual_palette", "cosmos")).background);
         java.io.File wallpaper = new java.io.File(activity.getFilesDir(), "premium-wallpaper.jpg");
         if (prefs.getBoolean("custom_wallpaper", false) && wallpaper.isFile()) {
             android.graphics.Bitmap bitmap = android.graphics.BitmapFactory.decodeFile(wallpaper.getAbsolutePath());
             if (bitmap != null) {
                 Drawable picture = new PremiumWallpaperDrawable(bitmap);
-                android.graphics.drawable.ColorDrawable shade = new android.graphics.drawable.ColorDrawable(0x66000000);
+                int dim = Math.max(0, Math.min(90, prefs.getInt("visual_wallpaper_dim", 40)));
+                android.graphics.drawable.ColorDrawable shade = new android.graphics.drawable.ColorDrawable(Math.round(dim * 2.55f) << 24);
                 root.setBackground(new android.graphics.drawable.LayerDrawable(new Drawable[]{picture, shade}));
             }
         }
+        dashboard.style();
     }
 }

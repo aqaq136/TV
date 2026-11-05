@@ -94,4 +94,16 @@ public class BackupArchiveTest {
         assertFalse(BackupArchive.KEYS.get(BackupArchive.PREMIUM).contains("weather_summary"));
         assertFalse(BackupArchive.FILES.contains("config.json"));
     }
+    @Test public void visualStudioAndCategoriesRoundTrip() throws Exception {
+        BackupArchive.Data source = empty(); Map<String,Object> p = source.preferences.get(BackupArchive.PREMIUM);
+        p.put("visual_palette", "sunset"); p.put("visual_scene", "horizon"); p.put("visual_quality", 2);
+        p.put("visual_particles", true); p.put("visual_tile_style", "neon"); p.put("app_categories", "{\"org.example\":2}");
+        assertEquals(source.preferences,BackupArchive.read(new ByteArrayInputStream(encode(source))).preferences);
+    }
+    @Test(expected = IOException.class) public void rejectsUnknownVisualPalette() throws Exception {
+        BackupArchive.Data source = empty(); source.preferences.get(BackupArchive.PREMIUM).put("visual_palette", "broken"); encode(source);
+    }
+    @Test(expected = IOException.class) public void rejectsInvalidManualCategories() throws Exception {
+        BackupArchive.Data source = empty(); source.preferences.get(BackupArchive.PREMIUM).put("app_categories", "{\"org.example\":99}"); encode(source);
+    }
 }
