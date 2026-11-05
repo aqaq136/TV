@@ -55,7 +55,7 @@ public final class VisualSettingsActivity extends ToolsActivityBase {
     private interface Choice { void select(int which); }
     private void choices(int title, int labels, int selected, Choice choice) {
         new LauncherDialogBuilder(this).setTitle(title).setSingleChoiceItems(getResources().getStringArray(labels), selected, (d,w) -> { choice.select(w); d.dismiss(); })
-                .setNegativeButton(android.R.string.cancel, null).show();
+                .setNegativeButton(R.string.action_cancel, null).show();
     }
     private int dp(int x) { return Math.round(x * getResources().getDisplayMetrics().density); }
     private TextView label(String text, int size) {

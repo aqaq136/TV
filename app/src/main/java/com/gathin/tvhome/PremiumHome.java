@@ -2,14 +2,12 @@ package com.gathin.tvhome;
 
 import android.app.Activity;
 import android.app.ActivityManager;
-import android.app.AlertDialog;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.StatFs;
-import android.provider.Settings;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.View;
@@ -39,51 +37,9 @@ final class PremiumHome {
         animations = Config.load(activity).animations;
         favorites = activity.findViewById(R.id.erokhinFavorites);
         if (favorites == null) return; // Alternate locale layout without the premium controls.
-        int[] ids = {R.id.erokhinStorage, R.id.erokhinMemory, R.id.erokhinStartup, R.id.erokhinSystem};
-        for (int i = 0; i < ids.length; i++) {
-            View v = activity.findViewById(ids[i]);
-            TextView utility = (TextView) v;
-            Drawable[] marks = utility.getCompoundDrawablesRelative();
-            for (Drawable mark : marks) if (mark != null) mark.setBounds(0, 0, dp(18), dp(18));
-            utility.setCompoundDrawablesRelative(marks[0], marks[1], marks[2], marks[3]);
-            v.setBackground(new PrismSurfaceDrawable(VisualPalette.of(PremiumPreferences.get(activity).getString("visual_palette", "cosmos")).primary,
-                    density, dp(10), "glass"));
-            v.setNextFocusLeftId(ids[Math.max(0, i - 1)]);
-            v.setNextFocusRightId(ids[Math.min(ids.length - 1, i + 1)]);
-            v.setNextFocusDownId(ids[i]);
-            decorate(v);
-            v.setOnKeyListener((view, code, event) -> {
-                if (code == KeyEvent.KEYCODE_DPAD_UP && event.getAction() == KeyEvent.ACTION_DOWN) {
-                    focusFavorite(); return true;
-                }
-                return false;
-            });
-        }
-        activity.findViewById(R.id.erokhinStorage).setOnClickListener(v -> open(Settings.ACTION_INTERNAL_STORAGE_SETTINGS));
-        activity.findViewById(R.id.erokhinStartup).setOnClickListener(v -> open(Settings.ACTION_HOME_SETTINGS));
-        activity.findViewById(R.id.erokhinMemory).setOnClickListener(v -> {
-            ActivityManager.MemoryInfo info = memory();
-            new LauncherDialogBuilder(activity).setTitle("Оперативная память")
-                    .setMessage(String.format(Locale.getDefault(), "Доступно: %.1f ГБ\nВсего: %.1f ГБ\n\nAndroid управляет памятью автоматически.",
-                            info.availMem / 1073741824.0, info.totalMem / 1073741824.0))
-                    .setPositiveButton("Понятно", null).show();
-        });
-        activity.findViewById(R.id.erokhinSystem).setOnClickListener(v ->
-                activity.startActivity(new Intent(activity, LauncherToolsActivity.class)));
         refreshFavorites();
     }
     private int dp(float value) { return Math.round(value * density); }
-    private String version() {
-        try { return activity.getPackageManager().getPackageInfo(activity.getPackageName(), 0).versionName; }
-        catch (PackageManager.NameNotFoundException e) { return ""; }
-    }
-    private void open(String action) {
-        try { activity.startActivity(new Intent(action)); }
-        catch (ActivityNotFoundException | SecurityException e) {
-            try { activity.startActivity(new Intent(Settings.ACTION_SETTINGS)); }
-            catch (ActivityNotFoundException | SecurityException missing) { message("Этот экран недоступен в прошивке телевизора"); }
-        }
-    }
     private void message(String text) { Toast.makeText(activity, text, Toast.LENGTH_LONG).show(); }
     private void decorate(View view) {
         view.setOnFocusChangeListener((v, focused) -> {
@@ -109,7 +65,7 @@ final class PremiumHome {
             if (launch == null) launch = pm.getLaunchIntentForPackage(pkg);
             if (launch == null) continue;
             try {
-                TextView button = button(pm.getApplicationLabel(pm.getApplicationInfo(pkg, 0)).toString(), pkg, 86);
+                TextView button = button(AppLabels.application(activity, pm.getApplicationInfo(pkg, 0)), pkg, 86);
                 Drawable icon = pm.getApplicationIcon(pkg);
                 icon.setBounds(0, 0, dp(24), dp(24));
                 button.setCompoundDrawables(null, icon, null, null);
@@ -163,7 +119,7 @@ final class PremiumHome {
         b.setOnKeyListener((v, code, event) -> {
             if (event.getAction() != KeyEvent.ACTION_DOWN) return false;
             if (code == KeyEvent.KEYCODE_DPAD_UP) { returnToGrid.run(); return true; }
-            if (code == KeyEvent.KEYCODE_DPAD_DOWN) { activity.findViewById(R.id.erokhinMemory).requestFocus(); return true; }
+            if (code == KeyEvent.KEYCODE_DPAD_DOWN) return true;
             return false;
         });
         return b;
@@ -188,7 +144,7 @@ final class PremiumHome {
     }
     void refreshStatus() {
         if (favorites == null) return;
-        ((TextView) activity.findViewById(R.id.erokhinMemory)).setText(String.format(Locale.getDefault(), "ОЗУ · %.1f ГБ", memory().availMem / 1073741824.0));
+        String ram = String.format(Locale.getDefault(), "ОЗУ · %.1f ГБ", memory().availMem / 1073741824.0);
         TextView subtitle = activity.findViewById(R.id.premiumSubtitle);
         if (subtitle != null) {
             android.content.SharedPreferences prefs = PremiumPreferences.get(activity);
@@ -202,8 +158,8 @@ final class PremiumHome {
             } else { subtitle.setText(R.string.visual_weather_choose); subtitle.setTextSize(11); }
         }
         StatFs storage = new StatFs(activity.getFilesDir().getAbsolutePath());
-        ((TextView) activity.findViewById(R.id.erokhinStorage)).setText(String.format(Locale.getDefault(), "Свободно · %.1f ГБ", storage.getAvailableBytes() / 1073741824.0));
-        dashboard.refreshStatus();
+        String available = String.format(Locale.getDefault(), "Свободно · %.1f ГБ", storage.getAvailableBytes() / 1073741824.0);
+        dashboard.refreshStatus(ram, available);
     }
     void applyAppearance() {
         View content = activity.findViewById(R.id.premiumContent);

@@ -92,7 +92,7 @@ public final class AppCenterActivity extends ToolsActivityBase {
         categoryButton.setBackgroundResource(R.drawable.visual_control); root.addView(categoryButton);
         categoryButton.setOnClickListener(v -> new LauncherDialogBuilder(this).setTitle(R.string.category_title)
                 .setSingleChoiceItems(getResources().getStringArray(R.array.category_choices), category, (d, which) -> { category = which; filter(); d.dismiss(); })
-                .setNegativeButton(android.R.string.cancel, null).show());
+                .setNegativeButton(R.string.action_cancel, null).show());
         summary = text(getString(R.string.center_loading), 14); root.addView(summary);
         list = new RecyclerView(this); list.setLayoutManager(new LinearLayoutManager(this));
         list.setItemAnimator(null); list.setAdapter(adapter); list.setClipToPadding(false);
@@ -120,7 +120,7 @@ public final class AppCenterActivity extends ToolsActivityBase {
                         if (info.activityInfo == null || !info.activityInfo.enabled || !info.activityInfo.exported) continue;
                         String pkg = info.activityInfo.packageName;
                         if (!pkg.equals(getPackageName()) && !entries.containsKey(pkg)) {
-                            entries.put(pkg, new Entry(pkg, info.loadLabel(pm).toString(), category.equals(Intent.CATEGORY_LEANBACK_LAUNCHER), info.activityInfo.applicationInfo.category));
+                            entries.put(pkg, new Entry(pkg, AppLabels.label(this, info), category.equals(Intent.CATEGORY_LEANBACK_LAUNCHER), info.activityInfo.applicationInfo.category));
                         }
                     }
                 }
@@ -232,7 +232,7 @@ public final class AppCenterActivity extends ToolsActivityBase {
                 try { if (info != null) startActivity(info); else Toast.makeText(this, R.string.center_info_missing, Toast.LENGTH_SHORT).show(); }
                 catch (ActivityNotFoundException | SecurityException ex) { Toast.makeText(this, R.string.center_info_missing, Toast.LENGTH_SHORT).show(); }
             }
-        }).setNegativeButton(android.R.string.cancel, null).show();
+        }).setNegativeButton(R.string.action_cancel, null).show();
     }
 
     @Override protected void onResume() { super.onResume(); if (ready) filter(); }
@@ -249,7 +249,7 @@ public final class AppCenterActivity extends ToolsActivityBase {
             if (which == 0) owner.remove(e.pkg); else owner.put(e.pkg, which);
             if (owner.size() > 128) { Toast.makeText(this, R.string.library_save_failed, Toast.LENGTH_LONG).show(); return; }
             PremiumPreferences.get(this).edit().putString("app_categories", new org.json.JSONObject(owner).toString()).apply(); filter(); d.dismiss();
-        }).setNegativeButton(android.R.string.cancel, null).show();
+        }).setNegativeButton(R.string.action_cancel, null).show();
     }
     @Override protected void onDestroy() { main.removeCallbacksAndMessages(null); worker.shutdownNow(); icons.evictAll(); super.onDestroy(); }
 

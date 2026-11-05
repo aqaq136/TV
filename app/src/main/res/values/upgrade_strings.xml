@@ -1,60 +1,60 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="center_title">Search and apps</string>
+    <string name="center_title">Поиск и приложения</string>
     <string name="center_favorite_label">★  %1$s</string>
-    <string name="center_hint">App name or package · Russian transliteration supported</string>
-    <string name="center_all">All apps</string>
-    <string name="center_favorites">Favorites</string>
-    <string name="center_recent">Recent</string>
-    <string name="center_selected"> · selected</string>
-    <string name="center_loading">Loading installed apps…</string>
-    <string name="center_load_failed">Could not load apps. Go back and try again.</string>
-    <string name="center_controls">OK: open · Hold OK or Menu: actions · Up: search and filters</string>
-    <string name="center_no_recent">No launches recorded yet. Launch an app from MetoxTV. History controls are in Tools.</string>
-    <string name="center_empty">No apps found. Change the query or select All apps.</string>
-    <string name="center_count">Apps found: %1$d</string>
-    <string name="center_launch_failed">Cannot open this app. It may have been removed or disabled.</string>
-    <string name="center_open">Open app</string>
-    <string name="center_add_home">Add shortcut to Home</string>
-    <string name="center_favorites_full">Favorites already contains 24 apps.</string>
-    <string name="center_home_saved">Home shortcut updated</string>
-    <string name="center_info_missing">App information is unavailable on this TV.</string>
-    <string name="backup_title">Back up and restore</string>
-    <string name="backup_description">Save appearance, favorites, tile order, Home shortcuts, sounds and custom wallpaper to a ZIP file on USB or another location you choose.\n\nThe copy includes your greeting name, favorite app packages and weather city. Keep it private. Apps, launch history, firmware settings and permissions are not included. No automatic upload.</string>
-    <string name="backup_export">Save a backup…</string>
-    <string name="backup_import">Restore from a file…</string>
-    <string name="backup_undo">Undo the last restore…</string>
-    <string name="backup_no_recovery">There is no previous restore to undo.</string>
-    <string name="backup_reading">Reading and checking the backup…</string>
-    <string name="backup_saving">Saving your backup…</string>
-    <string name="backup_picker_missing">This firmware has no compatible file picker. Your settings have not changed.</string>
-    <string name="backup_failed">Operation failed. Check the file and available space. A MetoxTV backup must be a valid ZIP of up to 6 MB. If a restore failed after it started, use “Undo the last restore” to recover the previous copy.</string>
-    <string name="backup_confirm_title">Replace launcher settings?</string>
-    <string name="backup_confirm">Backup validated. Saved settings: %1$d; files: %2$d.\n\nYour current portable settings, Home shortcuts and wallpaper will be replaced. Missing choices return to their defaults. Apps stay installed. A local copy of the current settings will be saved first; you can undo this restore.\n\nFirmware settings and permissions are excluded.</string>
-    <string name="backup_restore">Restore</string>
-    <string name="backup_restoring">Restoring settings…</string>
-    <string name="backup_restored">Settings restored. Return to Home to apply them. You can undo this restore here.</string>
-    <string name="backup_cancelled">Restore cancelled. Your settings have not changed.</string>
-    <string name="backup_valid">Backup checked. Confirm the restore or cancel.</string>
-    <string name="backup_saved">Backup saved to the location you selected.</string>
-    <string name="performance_title">Motion and performance</string>
+    <string name="center_hint">Название или пакет · можно писать транслитом</string>
+    <string name="center_all">Все приложения</string>
+    <string name="center_favorites">Избранное</string>
+    <string name="center_recent">Недавние</string>
+    <string name="center_selected"> · выбрано</string>
+    <string name="center_loading">Загружаем установленные приложения…</string>
+    <string name="center_load_failed">Не удалось загрузить приложения. Вернитесь назад и попробуйте ещё раз.</string>
+    <string name="center_controls">ОК — открыть · Удержание ОК или «Меню» — действия · Вверх — поиск и фильтры</string>
+    <string name="center_no_recent">Пока нет записанных запусков. Откройте приложение через MetoxTV. Управление историей — в инструментах.</string>
+    <string name="center_empty">Ничего не найдено. Измените запрос или выберите «Все приложения».</string>
+    <string name="center_count">Найдено приложений: %1$d</string>
+    <string name="center_launch_failed">Не удалось открыть приложение. Возможно, оно удалено или отключено.</string>
+    <string name="center_open">Открыть приложение</string>
+    <string name="center_add_home">Добавить ярлык на главный экран</string>
+    <string name="center_favorites_full">В избранном уже 24 приложения.</string>
+    <string name="center_home_saved">Ярлык главного экрана обновлён</string>
+    <string name="center_info_missing">Сведения о приложении недоступны в этой прошивке.</string>
+    <string name="backup_title">Резервные копии и восстановление</string>
+    <string name="backup_description">Сохраните оформление, избранное, порядок плиток, ярлыки главного экрана, звуки и свои обои в ZIP на флешке или в выбранной папке.\n\nВ копии есть имя из приветствия, пакеты избранных приложений и город погоды. Храните её у себя. Приложения, история запусков, настройки прошивки и разрешения в копию не входят. Автоматической отправки нет.</string>
+    <string name="backup_export">Сохранить резервную копию…</string>
+    <string name="backup_import">Восстановить из файла…</string>
+    <string name="backup_undo">Отменить последнее восстановление…</string>
+    <string name="backup_no_recovery">Предыдущего восстановления для отмены пока нет.</string>
+    <string name="backup_reading">Читаем и проверяем резервную копию…</string>
+    <string name="backup_saving">Сохраняем резервную копию…</string>
+    <string name="backup_picker_missing">В прошивке нет подходящего выбора файлов. Настройки не изменены.</string>
+    <string name="backup_failed">Не удалось выполнить операцию. Проверьте файл и свободное место. Нужен исправный ZIP резервной копии MetoxTV размером до 6 МБ. Если восстановление прервалось после начала записи, верните прежнюю копию кнопкой «Отменить последнее восстановление».</string>
+    <string name="backup_confirm_title">Заменить настройки лаунчера?</string>
+    <string name="backup_confirm">Копия прошла проверку: настроек — %1$d, файлов — %2$d.\n\nТекущие переносимые настройки, ярлыки и обои будут заменены. Отсутствующие параметры вернутся к значениям по умолчанию. Приложения останутся установленными. Сначала сохраним прежние настройки на телевизоре, чтобы можно было отменить восстановление.\n\nНастройки прошивки и разрешения не переносятся.</string>
+    <string name="backup_restore">Восстановить</string>
+    <string name="backup_restoring">Восстанавливаем настройки…</string>
+    <string name="backup_restored">Настройки восстановлены. Вернитесь на главный экран, чтобы применить их. Здесь можно отменить восстановление.</string>
+    <string name="backup_cancelled">Восстановление отменено. Настройки не изменены.</string>
+    <string name="backup_valid">Копия проверена. Подтвердите восстановление или отмените его.</string>
+    <string name="backup_saved">Резервная копия сохранена в выбранном месте.</string>
+    <string name="performance_title">Анимации и быстродействие</string>
     <string-array name="performance_choices">
-        <item>Fast · no animations</item>
-        <item>Balanced · basic animations</item>
-        <item>Full effects · for faster TVs</item>
+        <item>Быстрый · без анимаций</item>
+        <item>Сбалансированный · основные анимации</item>
+        <item>Все эффекты · для мощных телевизоров</item>
     </string-array>
-    <string name="performance_saved">Motion settings saved. Return to Home to apply them. This changes launcher effects only.</string>
-    <string name="idle_title">Clock when Home is idle</string>
-    <string name="idle_minutes">Delay: %1$d min</string>
-    <string name="idle_saved">Idle clock setting saved. The timer runs only on Home; it does not interrupt apps or video.</string>
-    <string name="history_title">Launch history</string>
-    <string name="history_disable">Stop recording new launches</string>
-    <string name="history_enable">Record launches from MetoxTV</string>
-    <string name="history_clear">Clear launch history</string>
-    <string name="history_clear_confirm">Remove locally saved app launch times? Favorites and tile order will stay. This does not clear the history inside your apps.</string>
-    <string name="history_disabled">New launches will not be recorded. Existing history remains until you clear it.</string>
-    <string name="history_enabled">Launches from MetoxTV will be recorded locally. Apps opened by other means are not tracked.</string>
-    <string name="history_cleared">Launch history cleared</string>
-    <string name="help_title">Remote control guide</string>
-    <string name="help_body">Arrow keys move focus; OK opens an app. Hold OK on a tile for favorites, moving, Home shortcuts and app information.\n\nThe magnifying glass at the top opens search. Search works offline with app names, package names and Russian transliteration: try “kino” for “Кинопоиск”. Recent lists launches made through MetoxTV.\n\nPress + in favorites to choose apps. Hold OK on a favorite to move it or remove its shortcut.\n\nBefore changing your layout, save a backup in Tools. You can restore it from USB and undo the last restore.\n\nIf focus feels slow, select Fast under Motion and performance. Home changes apply when you return from settings.\n\nTools also contains weather, APK installation and diagnostics. The stock Home screen remains available through your TV settings.</string>
+    <string name="performance_saved">Режим сохранён. Вернитесь на главный экран, чтобы применить его. Меняются только эффекты лаунчера.</string>
+    <string name="idle_title">Часы при простое главного экрана</string>
+    <string name="idle_minutes">Через %1$d мин.</string>
+    <string name="idle_saved">Таймер часов сохранён. Он работает только на главном экране и не прерывает приложения или видео.</string>
+    <string name="history_title">История запусков</string>
+    <string name="history_disable">Не записывать новые запуски</string>
+    <string name="history_enable">Записывать запуски из MetoxTV</string>
+    <string name="history_clear">Очистить историю запусков</string>
+    <string name="history_clear_confirm">Удалить сохранённое на телевизоре время запусков? Избранное и порядок плиток останутся. История внутри приложений не очищается.</string>
+    <string name="history_disabled">Новые запуски не записываются. Прежняя история останется, пока вы её не очистите.</string>
+    <string name="history_enabled">Запуски из MetoxTV будут сохраняться на телевизоре. Приложения, открытые другим способом, не отслеживаются.</string>
+    <string name="history_cleared">История запусков очищена</string>
+    <string name="help_title">Как пользоваться пультом</string>
+    <string name="help_body">Стрелки перемещают фокус, ОК открывает приложение. Удерживайте ОК на плитке для избранного, перемещения, ярлыков и сведений о приложении.\n\nЛупа вверху открывает поиск. Он работает без интернета: по названию, пакету и русскому транслиту. Например, «kino» найдёт «Кинопоиск». В недавних — запуски через MetoxTV.\n\nКнопка + в избранном открывает выбор приложений. Удерживайте ОК на избранном ярлыке, чтобы изменить порядок или убрать его.\n\nПеред настройкой оформления сохраните резервную копию в инструментах. Её можно восстановить с флешки, а последнее восстановление — отменить.\n\nЕсли управление тормозит, выберите «Быстрый» в разделе «Анимации и быстродействие». Изменения главного экрана применяются после возврата из настроек.\n\nПогода, установка APK и диагностика тоже находятся в инструментах. Штатный домашний экран остаётся доступным через настройки телевизора.</string>
 </resources>

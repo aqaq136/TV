@@ -45,7 +45,7 @@ public final class LauncherToolsActivity extends ToolsActivityBase {
         row(rows, getString(R.string.idle_title), this::idleClock);
         row(rows, getString(R.string.history_title), this::history);
         row(rows, getString(R.string.help_title), () -> new LauncherDialogBuilder(this).setTitle(R.string.help_title)
-                .setMessage(R.string.help_body).setPositiveButton(android.R.string.ok, null).show());
+                .setMessage(R.string.help_body).setPositiveButton(R.string.action_ok, null).show());
         row(rows, "Установить APK с флешки", this::pickApk);
         row(rows, "Удалить приложение…", this::chooseUninstall);
         row(rows, "Форма плиток", this::chooseShape);
@@ -89,7 +89,7 @@ public final class LauncherToolsActivity extends ToolsActivityBase {
                 .setSingleChoiceItems(getResources().getStringArray(R.array.performance_choices), selected, (d, which) -> {
                     p.edit().putBoolean("animations", which > 0).putBoolean("advanced_effects", which == 2).apply();
                     PremiumPreferences.changed(this); d.dismiss(); status.setText(R.string.performance_saved);
-                }).setNegativeButton(android.R.string.cancel, null).show();
+                }).setNegativeButton(R.string.action_cancel, null).show();
     }
     private void idleClock() {
         int[] minutes = {0, 2, 5, 10, 15, 30};
@@ -102,7 +102,7 @@ public final class LauncherToolsActivity extends ToolsActivityBase {
         new LauncherDialogBuilder(this).setTitle(R.string.idle_title).setSingleChoiceItems(labels, selected, (d, which) -> {
             getSharedPreferences(Config.SETTINGS_NAME, MODE_PRIVATE).edit().putInt("home_idle_clock_minutes", minutes[which]).apply();
             PremiumPreferences.changed(this); d.dismiss(); status.setText(R.string.idle_saved);
-        }).setNegativeButton(android.R.string.cancel, null).show();
+        }).setNegativeButton(R.string.action_cancel, null).show();
     }
     private void history() {
         android.content.SharedPreferences p = PremiumPreferences.get(this);
@@ -115,8 +115,8 @@ public final class LauncherToolsActivity extends ToolsActivityBase {
                     } else new LauncherDialogBuilder(this).setTitle(R.string.history_clear)
                             .setMessage(R.string.history_clear_confirm).setPositiveButton(R.string.history_clear, (dialog, button) -> {
                                 LastOpened.clear(this); status.setText(R.string.history_cleared);
-                            }).setNegativeButton(android.R.string.cancel, null).show();
-                }).setNegativeButton(android.R.string.cancel, null).show();
+                            }).setNegativeButton(R.string.action_cancel, null).show();
+                }).setNegativeButton(R.string.action_cancel, null).show();
     }
     private interface Work { void run(ToolNetwork net) throws Exception; }
     private synchronized void cancel() {
@@ -129,7 +129,7 @@ public final class LauncherToolsActivity extends ToolsActivityBase {
         ToolNetwork current = new ToolNetwork(); network = current;
         task = worker.submit(() -> {
             try { operation.run(current); }
-            catch (Exception e) { result(current, () -> status.setText(label + "\nНе удалось выполнить операцию. Проверьте подключение, выбранный файл и доступность сервиса. " + e.getClass().getSimpleName())); }
+            catch (Exception e) { result(current, () -> status.setText(label + "\nНе удалось выполнить операцию. Проверьте подключение, выбранный файл и доступность сервиса. ")); }
             finally { current.close(); }
         });
     }
@@ -223,10 +223,10 @@ public final class LauncherToolsActivity extends ToolsActivityBase {
     private void chooseUninstall() {
         Map<String, String> apps = new TreeMap<>();
         for (android.content.pm.ResolveInfo r : getPackageManager().queryIntentActivities(new Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LEANBACK_LAUNCHER), 0)) {
-            if ((r.activityInfo.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) == 0 && !r.activityInfo.packageName.equals(getPackageName())) apps.put(r.activityInfo.packageName, r.loadLabel(getPackageManager()).toString());
+            if ((r.activityInfo.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) == 0 && !r.activityInfo.packageName.equals(getPackageName())) apps.put(r.activityInfo.packageName, AppLabels.label(this, r));
         }
         for (android.content.pm.ResolveInfo r : getPackageManager().queryIntentActivities(new Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER), 0)) {
-            if ((r.activityInfo.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) == 0 && !r.activityInfo.packageName.equals(getPackageName())) apps.put(r.activityInfo.packageName, r.loadLabel(getPackageManager()).toString());
+            if ((r.activityInfo.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) == 0 && !r.activityInfo.packageName.equals(getPackageName())) apps.put(r.activityInfo.packageName, AppLabels.label(this, r));
         }
         if (apps.isEmpty()) { message("Нет доступных пользовательских приложений"); return; }
         List<String> packages = new ArrayList<>(apps.keySet()); packages.sort((a, b) -> apps.get(a).compareToIgnoreCase(apps.get(b)));
@@ -240,7 +240,7 @@ public final class LauncherToolsActivity extends ToolsActivityBase {
             if ((app.flags & ApplicationInfo.FLAG_SYSTEM) != 0 || pkg.equals(activity.getPackageName())) {
                 Toast.makeText(activity, "Системные приложения и сам лаунчер здесь не удаляются", Toast.LENGTH_LONG).show(); return;
             }
-            new LauncherDialogBuilder(activity).setTitle("Удалить «" + activity.getPackageManager().getApplicationLabel(app) + "»?")
+            new LauncherDialogBuilder(activity).setTitle("Удалить «" + AppLabels.application(activity, app) + "»?")
                     .setMessage(pkg + "\nПриложение и его локальные данные будут удалены. Системный установщик запросит подтверждение.")
                     .setPositiveButton("Продолжить", (d, w) -> {
                         try { activity.startActivity(new Intent(Intent.ACTION_DELETE, Uri.parse("package:" + pkg))); }
@@ -303,10 +303,12 @@ public final class LauncherToolsActivity extends ToolsActivityBase {
         try { version = getPackageManager().getPackageInfo(getPackageName(), 0).versionName; } catch (PackageManager.NameNotFoundException ignored) {}
         android.os.StatFs fs = new android.os.StatFs(getFilesDir().getAbsolutePath());
         android.util.DisplayMetrics dm = getResources().getDisplayMetrics();
-        return "MetoxTV diagnostic report\nTime: " + new Date() + "\nVersion: " + version + "\nPackage: " + getPackageName()
-                + "\nManufacturer: " + android.os.Build.MANUFACTURER + "\nModel: " + android.os.Build.MODEL + "\nAndroid: " + android.os.Build.VERSION.RELEASE
-                + " (API " + android.os.Build.VERSION.SDK_INT + ")\nDisplay: " + dm.widthPixels + "x" + dm.heightPixels + " density=" + dm.density
-                + "\nFree storage: " + fs.getAvailableBytes() / 1048576 + " MB\nTile shape: " + PremiumPreferences.get(this).getString("tile_shape", "wide")
+        return "MetoxTV — диагностический отчёт\nВремя: " + java.text.DateFormat.getDateTimeInstance(java.text.DateFormat.MEDIUM, java.text.DateFormat.SHORT, LauncherLocale.RUSSIAN).format(new Date()) + "\nВерсия: " + version + "\nПакет: " + getPackageName()
+                + "\nПроизводитель: " + android.os.Build.MANUFACTURER + "\nМодель: " + android.os.Build.MODEL + "\nAndroid: " + android.os.Build.VERSION.RELEASE
+                + " (API " + android.os.Build.VERSION.SDK_INT + ")\nЭкран: " + dm.widthPixels + "×" + dm.heightPixels + " · плотность: " + dm.density
+                + "\nСвободное место: " + fs.getAvailableBytes() / 1048576 + " МБ\nФорма плиток: "
+                + ("square".equals(PremiumPreferences.get(this).getString("tile_shape", "wide")) ? "Квадратные"
+                : "compact".equals(PremiumPreferences.get(this).getString("tile_shape", "wide")) ? "Компактные" : "Широкие")
                 + "\n" + localConnection() + "\n\nОтчёт не содержит серийного номера, IP/MAC, паролей, списка приложений или системных логов. Никуда не отправлен автоматически.";
     }
     private void diagnostics() {
@@ -314,7 +316,7 @@ public final class LauncherToolsActivity extends ToolsActivityBase {
         new LauncherDialogBuilder(this).setTitle("Диагностика").setMessage(report)
                 .setPositiveButton("Сохранить TXT", (d, w) -> {
                     try { startActivityForResult(new Intent(Intent.ACTION_CREATE_DOCUMENT).addCategory(Intent.CATEGORY_OPENABLE)
-                            .setType("text/plain").putExtra(Intent.EXTRA_TITLE, "MetoxTV-diagnostics.txt"), SAVE_REPORT); }
+                            .setType("text/plain").putExtra(Intent.EXTRA_TITLE, "MetoxTV-отчёт.txt"), SAVE_REPORT); }
                     catch (ActivityNotFoundException e) { message("В прошивке нет сохранения файлов. Используйте «Поделиться» или фотографию отчёта."); }
                 }).setNeutralButton("Поделиться", (d, w) -> {
                     try { startActivity(Intent.createChooser(new Intent(Intent.ACTION_SEND).setType("text/plain").putExtra(Intent.EXTRA_TEXT, report), "Отправить отчёт")); }

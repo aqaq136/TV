@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="action_cancel">Отмена</string>
+    <string name="action_ok">ОК</string>
+    <string name="good_forenoon">Доброе утро</string>
+    <string name="premium_add_favorite">Добавить в избранное</string>
+    <string name="premium_remove_favorite">Убрать из избранного</string>
+    <string name="premium_uninstall">Удалить приложение…</string>
+    <string name="lunar_date_format">Лунная дата: %1$d/%2$s · %3$s</string>
+    <string name="lunar_month_leap">%1$d (доп.)</string>
+    <string name="lunar_year">Год %2$s</string>
+    <string-array name="lunar_stems">
+        <item>Цзя</item><item>И</item><item>Бин</item><item>Дин</item><item>У</item>
+        <item>Цзи</item><item>Гэн</item><item>Синь</item><item>Жэнь</item><item>Гуй</item>
+    </string-array>
+    <string-array name="lunar_branches">
+        <item>Крысы</item><item>Быка</item><item>Тигра</item><item>Кролика</item><item>Дракона</item><item>Змеи</item>
+        <item>Лошади</item><item>Козы</item><item>Обезьяны</item><item>Петуха</item><item>Собаки</item><item>Свиньи</item>
+    </string-array>
+</resources>

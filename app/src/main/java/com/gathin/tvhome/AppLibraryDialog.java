@@ -304,9 +304,9 @@ final class AppLibraryDialog {
         return value;
     }
 
-    private static String loadLabel(PackageManager pm, ResolveInfo app) {
+    private String loadLabel(PackageManager pm, ResolveInfo app) {
         String pkg = app.activityInfo.packageName;
-        try { return Cards.cleanLabel(String.valueOf(app.loadLabel(pm)), pkg); }
+        try { return Cards.cleanLabel(AppLabels.label(activity, app), pkg); }
         catch (RuntimeException unavailable) { return pkg; }
     }
 
@@ -344,7 +344,7 @@ final class AppLibraryDialog {
 
     /** Reuse translated actions instead of shipping another hint in every locale. */
     private String hint(boolean home) {
-        if (selectionMode) return activity.getString(android.R.string.ok) + ": "
+        if (selectionMode) return activity.getString(R.string.action_ok) + ": "
                 + activity.getString(home ? R.string.library_remove_shortcut : R.string.library_add_home);
         return activity.getString(home || okOpens ? R.string.library_hint_open : R.string.library_hint_add);
     }

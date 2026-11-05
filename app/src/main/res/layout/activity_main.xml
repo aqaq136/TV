@@ -470,18 +470,7 @@
             android:layout_height="46dp" android:orientation="horizontal" android:gravity="center_vertical"
             android:clipChildren="false"/>
         </HorizontalScrollView>
-        <LinearLayout android:layout_width="match_parent" android:layout_height="42dp"
-            android:orientation="horizontal" android:gravity="center_vertical" android:layout_marginTop="6dp"
-            android:clipChildren="false">
-            <TextView android:id="@+id/erokhinStorage" style="@style/PremiumUtility"
-                android:text="Хранилище TV" android:drawableStart="@drawable/ic_apps"/>
-            <TextView android:id="@+id/erokhinMemory" style="@style/PremiumUtility"
-                android:text="Память" android:drawableStart="@drawable/ic_input"/>
-            <TextView android:id="@+id/erokhinStartup" style="@style/PremiumUtility"
-                android:text="Домашний экран" android:drawableStart="@drawable/ic_home_settings"/>
-            <TextView android:id="@+id/erokhinSystem" style="@style/PremiumUtility"
-                android:text="Инструменты" android:drawableStart="@drawable/ic_settings"/>
-        </LinearLayout>
+
     </LinearLayout>
 
     <!-- The single floating glass highlight that springs between tiles. -->

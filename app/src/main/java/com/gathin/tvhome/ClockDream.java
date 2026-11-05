@@ -7,6 +7,7 @@ import android.service.dreams.DreamService;
  * No network, no images: cheap enough for a 1 GB TV.
  */
 public class ClockDream extends DreamService {
+    @Override protected void attachBaseContext(android.content.Context base) { super.attachBaseContext(LauncherLocale.wrap(base)); }
 
     private ClockScene scene;
 

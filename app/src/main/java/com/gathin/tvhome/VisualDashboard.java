@@ -60,6 +60,7 @@ final class VisualDashboard {
         action(bar, R.string.center_recent, () -> apps(2));
         action(bar, R.string.visual_studio, () -> activity.startActivity(new Intent(activity, VisualSettingsActivity.class)));
         timer = action(bar, R.string.visual_timer, this::chooseTimer);
+        action(bar, R.string.visual_tools, () -> activity.startActivity(new Intent(activity, LauncherToolsActivity.class)));
         View weather = activity.findViewById(R.id.visualWeather);
         weather.setOnClickListener(v -> activity.startActivity(new Intent(activity, LauncherToolsActivity.class).putExtra("action", "weather")));
         View stats = activity.findViewById(R.id.visualDevice);
@@ -151,10 +152,9 @@ final class VisualDashboard {
             heroIcon.animate().alpha(.65f).rotation(0).scaleX(1).scaleY(1).setDuration(320).start();
         } else { title.setAlpha(1); title.setTranslationY(0); heroIcon.setAlpha(.65f); }
     }
-    void refreshStatus() {
+    void refreshStatus(String ram, String storage) {
         if (atmosphere == null) return;
-        TextView ram = activity.findViewById(R.id.erokhinMemory), storage = activity.findViewById(R.id.erokhinStorage);
-        ((TextView) activity.findViewById(R.id.visualDeviceText)).setText(activity.getString(R.string.visual_device_info, ram.getText(), storage.getText()));
+        ((TextView) activity.findViewById(R.id.visualDeviceText)).setText(activity.getString(R.string.visual_device_info, ram, storage));
         refreshTimer();
     }
     private void refreshRecent() {
@@ -171,7 +171,7 @@ final class VisualDashboard {
                     target = activity.getPackageManager().getLeanbackLaunchIntentForPackage(entry.getKey());
                     if (target == null) target = activity.getPackageManager().getLaunchIntentForPackage(entry.getKey());
                     if (target != null && !entry.getKey().equals(activity.getPackageName())) {
-                        pkg = entry.getKey(); label = activity.getPackageManager().getApplicationLabel(activity.getPackageManager().getApplicationInfo(pkg, 0)).toString(); break;
+                        pkg = entry.getKey(); label = AppLabels.application(activity, activity.getPackageManager().getApplicationInfo(pkg, 0)); break;
                     }
                 } catch (android.content.pm.PackageManager.NameNotFoundException | RuntimeException ignored) { target = null; }
             }
@@ -195,6 +195,6 @@ final class VisualDashboard {
         new LauncherDialogBuilder(activity).setTitle(R.string.visual_timer).setItems(labels, (d, which) -> {
             if (which == 4) SESSION.stop(); else SESSION.start(SystemClock.elapsedRealtime(), durations[which]); refreshTimer();
             Toast.makeText(activity, R.string.visual_timer_note, Toast.LENGTH_LONG).show();
-        }).setNegativeButton(android.R.string.cancel, null).show();
+        }).setNegativeButton(R.string.action_cancel, null).show();
     }
 }

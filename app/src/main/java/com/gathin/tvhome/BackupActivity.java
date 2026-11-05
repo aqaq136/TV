@@ -74,7 +74,7 @@ public final class BackupActivity extends ToolsActivityBase {
                 .setPositiveButton(R.string.backup_restore, (d, w) -> work(R.string.backup_restoring, () -> {
                     BackupStore.restore(getApplicationContext(), data);
                     show(() -> status.setText(R.string.backup_restored));
-                })).setNegativeButton(android.R.string.cancel, (d, w) -> status.setText(R.string.backup_cancelled)).show();
+                })).setNegativeButton(R.string.action_cancel, (d, w) -> status.setText(R.string.backup_cancelled)).show();
         status.setText(R.string.backup_valid);
     }
     @Override protected void onActivityResult(int request, int result, Intent data) {

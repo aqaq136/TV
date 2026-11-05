@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="visual_tools">Инструменты</string>
     <string name="visual_studio">Визуальная студия</string>
     <string name="visual_welcome">Ваш вечер. Ваш экран.</string>
-    <string name="visual_open_hint">OK — открыть · Удержание OK — действия</string>
+    <string name="visual_open_hint">ОК — открыть · Удержание ОК — действия</string>
     <string name="visual_last_opened">Последний запуск: %1$s</string>
     <string name="visual_browse">Открыть ваши приложения →</string>
     <string name="visual_continue">▶ Продолжить · %1$s</string>
