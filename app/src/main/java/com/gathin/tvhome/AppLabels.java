@@ -35,7 +35,7 @@ final class AppLabels {
         if (pkg == null) return null;
         switch (pkg) {
             case "com.android.traceur": return "Системная трассировка";
-            case "com.google.android.videos": return "Видео Google";
+            case "com.google.android.videos": case "com.lego.android.tvleanback": return "Видео Google";
             case "com.android.tv.settings": case "com.android.settings": return "Настройки телевизора";
             case "com.android.documentsui": case "com.google.android.documentsui": return "Файлы";
             case "com.android.browser": return "Браузер";

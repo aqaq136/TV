@@ -8,6 +8,7 @@ public class AppLabelsTest {
         assertEquals("Системная трассировка", AppLabels.knownTitle("com.android.traceur"));
         assertEquals("Настройки телевизора", AppLabels.knownTitle("com.android.tv.settings"));
         assertEquals("Файлы", AppLabels.knownTitle("com.android.documentsui"));
+        assertEquals("Видео Google", AppLabels.knownTitle("com.lego.android.tvleanback"));
     }
     @Test public void unrelatedApplicationBrandsKeepTheirOwnLabels() {
         assertNull(AppLabels.knownTitle("com.google.android.youtube.tv"));
