@@ -110,7 +110,7 @@ public class VisualHomeTest {
             assertEquals("Выбрать город →", ((android.widget.TextView)weather.findViewById(R.id.weatherStatus)).getText().toString());
             assertTrue(weather.findViewById(R.id.weatherUpdate).hasFocus());
         });
-        screenshot("weather-setup");
+        SystemClock.sleep(650); screenshot("weather-setup");
         instrumentation.sendKeyDownUpSync(KeyEvent.KEYCODE_DPAD_DOWN); instrumentation.waitForIdleSync();
         instrumentation.runOnMainSync(() -> { assertEquals(R.id.weatherCity, weather.getCurrentFocus().getId()); weather.finish(); });
         instrumentation.waitForIdleSync();
@@ -125,7 +125,7 @@ public class VisualHomeTest {
             assertTrue(text.contains("Тестовый город")); assertTrue(text.contains("Яндекс Погода"));
             assertTrue(text.contains("+20 °C"));
         });
-        screenshot("weather-cached-fixture");
+        SystemClock.sleep(650); screenshot("weather-cached-fixture");
         instrumentation.runOnMainSync(cached::finish); instrumentation.waitForIdleSync();
         Activity home = start(MainActivity.class);
         instrumentation.runOnMainSync(() -> assertTrue(((android.widget.TextView)home.findViewById(R.id.premiumSubtitle)).getText().toString().contains("Яндекс Погода")));
