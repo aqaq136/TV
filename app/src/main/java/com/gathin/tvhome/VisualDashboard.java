@@ -62,7 +62,7 @@ final class VisualDashboard {
         timer = action(bar, R.string.visual_timer, this::chooseTimer);
         action(bar, R.string.visual_tools, () -> activity.startActivity(new Intent(activity, LauncherToolsActivity.class)));
         View weather = activity.findViewById(R.id.visualWeather);
-        weather.setOnClickListener(v -> activity.startActivity(new Intent(activity, LauncherToolsActivity.class).putExtra("action", "weather")));
+        weather.setOnClickListener(v -> activity.startActivity(new Intent(activity, WeatherActivity.class)));
         View stats = activity.findViewById(R.id.visualDevice);
         stats.setOnClickListener(v -> activity.startActivity(new Intent(activity, LauncherToolsActivity.class)));
         for (View v : new View[]{continueButton, weather, stats}) {

@@ -91,7 +91,7 @@ final class BackupStore {
                 else if (v instanceof Integer) editor.putInt(key, (Integer) v);
             }
             // A cached weather summary belongs to the former city, not the restored one.
-            if (name.equals(BackupArchive.PREMIUM)) editor.remove("weather_summary").remove("weather_time");
+            if (name.equals(BackupArchive.PREMIUM)) editor.remove("weather_summary").remove("weather_time").remove("weather_source").remove("weather_attempt").remove("weather_error").remove("weather_hidden");
             if (!editor.commit()) throw new IOException("Cannot save settings");
         }
         PremiumPreferences.changed(context);
