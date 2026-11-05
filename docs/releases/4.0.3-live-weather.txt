@@ -1,0 +1,9 @@
+Живые запросы погоды без ключей из GitHub Actions.
+Проверочные города: Москва и Казань. Это не сохранённые данные погоды пользователя.
+https://github.com/aqaq136/TV/actions/runs/42131046370
+
+2026-11-05T23:42:39.4258846Z LIVE WEATHER OK | Москва | MET Norway | +2 °C · Пасмурно · ветер 3 м/с
+2026-11-05T23:42:39.4259823Z LIVE WEATHER OK | Москва | Open-Meteo | +2 °C · Снег · ветер 10 км/ч
+2026-11-05T23:42:39.4266831Z LIVE WEATHER OK | Казань | MET Norway | -1 °C · Пасмурно · ветер 2 м/с
+2026-11-05T23:42:39.4267590Z LIVE WEATHER OK | Казань | Open-Meteo | -2 °C · Облачно · ветер 5 км/ч
+2026-11-05T23:42:39.4268155Z LIVE WEATHER PASSED | 2 cities | no API keys

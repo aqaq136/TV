@@ -12,7 +12,7 @@ if errorlevel 1 (
 )
 echo Подключённые устройства:
 "%ADB%" devices
-echo Устанавливаем MetoxTV 4.0.2 без удаления настроек...
+echo Устанавливаем MetoxTV 4.0.3 без удаления настроек...
 "%ADB%" install -r "MetoxTV.apk"
 if errorlevel 1 (
  echo Установка не выполнена. Смотрите INSTALL_RU.txt.
