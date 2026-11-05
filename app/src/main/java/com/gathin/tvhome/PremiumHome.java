@@ -42,6 +42,8 @@ final class PremiumHome {
         int[] ids = {R.id.erokhinStorage, R.id.erokhinMemory, R.id.erokhinStartup, R.id.erokhinSystem};
         for (int i = 0; i < ids.length; i++) {
             View v = activity.findViewById(ids[i]);
+            v.setBackground(new PrismSurfaceDrawable(VisualPalette.of(PremiumPreferences.get(activity).getString("visual_palette", "cosmos")).primary,
+                    density, dp(10), "glass"));
             v.setNextFocusLeftId(ids[Math.max(0, i - 1)]);
             v.setNextFocusRightId(ids[Math.min(ids.length - 1, i + 1)]);
             v.setNextFocusDownId(ids[i]);
@@ -149,7 +151,8 @@ final class PremiumHome {
         b.setText(label); b.setContentDescription(label); b.setTextColor(Color.WHITE); b.setTextSize(11);
         b.setSingleLine(true); b.setEllipsize(android.text.TextUtils.TruncateAt.END);
         b.setGravity(Gravity.CENTER); b.setPadding(dp(8), 0, dp(8), 0);
-        b.setBackgroundResource(R.drawable.erokhin_focus_tile); b.setFocusable(true); b.setClickable(true);
+        b.setBackground(new PrismSurfaceDrawable(VisualPalette.of(PremiumPreferences.get(activity).getString("visual_palette", "cosmos")).primary,
+                density, dp(10), "glass")); b.setFocusable(true); b.setClickable(true);
         LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(dp(width), dp(44));
         lp.setMargins(dp(4), 0, dp(4), 0); favorites.addView(b, lp);
         decorate(b);

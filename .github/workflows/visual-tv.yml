@@ -16,6 +16,7 @@ concurrency:
 
 jobs:
   tv:
+    if: github.event_name != 'pull_request' || github.head_ref != 'codex/metoxtv-4-visual'
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -39,18 +40,40 @@ jobs:
           profile: tv_1080p
           disable-animations: false
           emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -camera-back none -skin 1920x1080
-          script: |
-            bash ./gradlew :app:connectedDebugAndroidTest --no-daemon --max-workers=2
-      - name: Collect screenshots
-        if: always()
-        run: |
-          mkdir -p work/tv-screenshots
-          adb pull /sdcard/Android/data/com.gathin.tvhome/files/screenshots/. work/tv-screenshots/ || true
+          script: bash tools/verify-tv.sh
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: Android-TV-4.0-screenshots-and-tests
+          name: MetoxTV-TV-screenshots
+          path: work/tv-screenshots/
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: Android-TV-test-reports
           path: |
-            work/tv-screenshots/
             app/build/reports/androidTests/
             app/build/outputs/androidTest-results/
+
+  publish-preview:
+    needs: tv
+    if: github.event_name == 'push' && github.ref_name == 'codex/metoxtv-4-visual'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/download-artifact@v4
+        with:
+          name: MetoxTV-TV-screenshots
+          path: work/rendered
+      - name: Save actual emulator captures in a separate preview branch
+        env:
+          PREVIEW_BRANCH: codex/tv-preview-${{ github.run_id }}
+        run: |
+          mkdir -p docs/screenshots
+          cp work/rendered/*.png docs/screenshots/
+          git switch -c "$PREVIEW_BRANCH"
+          git add docs/screenshots
+          git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m 'Capture actual Android TV 9 visual previews'
+          git push origin "$PREVIEW_BRANCH"
