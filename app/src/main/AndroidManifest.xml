@@ -111,6 +111,8 @@
 
         <provider android:name=".InstallApkProvider" android:authorities="${applicationId}.installer"
             android:exported="false" android:grantUriPermissions="true" />
+        <activity android:name=".AppCenterActivity" android:exported="false" android:screenOrientation="landscape" />
+        <activity android:name=".BackupActivity" android:exported="false" android:screenOrientation="landscape" />
         <activity android:name=".LauncherToolsActivity" android:exported="false" android:screenOrientation="landscape" />
         <activity android:name=".PremiumSettingsActivity" android:exported="false"
             android:screenOrientation="landscape" />

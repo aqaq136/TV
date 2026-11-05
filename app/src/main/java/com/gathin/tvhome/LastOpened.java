@@ -19,8 +19,11 @@ final class LastOpened {
 
     /** Notes that Home just opened this app. */
     static void record(Context ctx, String pkg) {
+        if (pkg == null || !PremiumPreferences.get(ctx).getBoolean("history_enabled", true)) return;
         prefs(ctx).edit().putLong(pkg, System.currentTimeMillis()).apply();
     }
+
+    static void clear(Context ctx) { prefs(ctx).edit().clear().apply(); }
 
     /** Milliseconds since the epoch, or 0 when Home never opened the app. */
     static long get(Context ctx, String pkg) {

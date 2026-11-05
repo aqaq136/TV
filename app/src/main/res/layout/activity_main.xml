@@ -364,6 +364,13 @@
                     android:nextFocusDown="@+id/grid" />
 
                 <TextView
+                    android:id="@+id/btnSearch"
+                    style="@style/TopButtonIcon"
+                    android:contentDescription="@string/center_title"
+                    android:drawableStart="@drawable/ic_search"
+                    android:nextFocusDown="@+id/grid" />
+
+                <TextView
                     android:id="@+id/btnLibraryTop"
                     style="@style/TopButtonIcon"
                     android:visibility="gone"

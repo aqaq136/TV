@@ -836,6 +836,8 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             libraryFromTopBar = true;   // closing it goes back to this button, not to the pill after the last row
         });
         btnLibraryTop.setVisibility(cfg.libraryButton && cfg.appLibrary ? View.VISIBLE : View.GONE);
+        View btnSearch = findViewById(R.id.btnSearch);
+        if (btnSearch != null) btnSearch.setOnClickListener(v -> startActivity(new Intent(this, AppCenterActivity.class)));
         addTopBarApps(cfg.topBarApps, cfg.launchActions);
         iconOnlyButtons = cfg.iconOnlyButtons;
         topMenu = cfg.topMenu;
@@ -906,10 +908,12 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         btnSettings.setOnKeyListener(pillKeys);
         btnReorder.setOnKeyListener(pillKeys);
         btnLibraryTop.setOnKeyListener(pillKeys);
+        if (btnSearch != null) btnSearch.setOnKeyListener(pillKeys);
         for (View button : topAppButtons) button.setOnKeyListener(pillKeys);
         if (advancedEffects) {
             List<View> pills = new ArrayList<>(Arrays.asList(btnInputs, btnWifi, btnVpn, btnReorder, btnLibraryTop, btnSettings));
             pills.addAll(topAppButtons);
+            if (btnSearch != null) pills.add(btnSearch);
             for (View button : pills) {
                 button.setOnFocusChangeListener((view, focused) -> view.animate()
                         .scaleX(focused ? 1.04f : 1f).scaleY(focused ? 1.04f : 1f)
@@ -1408,6 +1412,10 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     @Override
     public boolean dispatchKeyEvent(KeyEvent event) {
         if (launcherSounds != null) launcherSounds.key(event);
+        if (resumed && !reordering && openPopup == null && cardPrompt == null && event.getKeyCode() == KeyEvent.KEYCODE_SEARCH) {
+            if (event.getAction() == KeyEvent.ACTION_UP && !event.isCanceled()) startActivity(new Intent(this, AppCenterActivity.class));
+            return true;
+        }
         // Vendor keys (TCL Netflix button, 4062) never reach the key services, only the focused window, so their
         // "hold:" entries run here too or nowhere. Only while resumed: onPause releases Home's holds, and a DOWN
         // taken after that would arm one nothing releases.

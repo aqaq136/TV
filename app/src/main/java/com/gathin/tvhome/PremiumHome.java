@@ -104,7 +104,7 @@ final class PremiumHome {
                 Intent target = launch;
                 button.setOnClickListener(v -> {
                     focusedPackage = pkg;
-                    try { activity.startActivity(target); restoreAfterLaunch = true; }
+                    try { activity.startActivity(target); LastOpened.record(activity, pkg); restoreAfterLaunch = true; }
                     catch (ActivityNotFoundException | SecurityException e) { message("Не удалось открыть приложение. Проверьте, установлено ли оно."); refreshFavorites(); }
                 });
                 button.setOnLongClickListener(v -> {
