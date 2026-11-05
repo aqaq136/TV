@@ -13,8 +13,9 @@ android {
         applicationId providers.gradleProperty('launcherApplicationId').getOrElse('com.gathin.tvhome')
         minSdk 26
         targetSdk 34
-        versionCode 17
-        versionName '4.0.0'
+        versionCode 18
+        versionName '4.0.1'
+        resourceConfigurations += ['ru']
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
     }
 

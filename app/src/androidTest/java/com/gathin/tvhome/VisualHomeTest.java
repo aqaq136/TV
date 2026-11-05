@@ -56,6 +56,11 @@ public class VisualHomeTest {
         instrumentation.runOnMainSync(() -> {
             AtmosphereView atmosphere = home.findViewById(R.id.visualAtmosphere);
             assertNotNull(atmosphere); assertTrue(atmosphere.isRendering());
+            assertEquals("ru", home.getResources().getConfiguration().getLocales().get(0).getLanguage());
+            assertEquals("Все приложения", home.getString(R.string.visual_all));
+            assertEquals("Источники", home.getString(R.string.inputs));
+            assertEquals("Отмена", home.getString(android.R.string.cancel));
+            assertEquals("Системная трассировка", AppLabels.knownTitle("com.android.traceur"));
             View hero = home.findViewById(R.id.visualHeroPanel), grid = home.findViewById(R.id.grid), bar = home.findViewById(R.id.visualQuickBar);
             assertTrue(hero.getHeight() > 0); assertTrue(grid.getHeight() >= 80 * home.getResources().getDisplayMetrics().density);
             int[] barLocation = new int[2], gridLocation = new int[2];
@@ -74,11 +79,15 @@ public class VisualHomeTest {
         });
         screenshot("home-remote-focus");
         Activity studio = start(VisualSettingsActivity.class); SystemClock.sleep(600); screenshot("visual-studio");
+        assertEquals("Визуальная студия", studio.getString(R.string.visual_studio));
         instrumentation.runOnMainSync(() -> {
             assertFalse(((AtmosphereView) home.findViewById(R.id.visualAtmosphere)).isRendering());
             studio.finish();
         });
         instrumentation.waitForIdleSync();
+        Activity catalog = start(AppCenterActivity.class); SystemClock.sleep(600); screenshot("catalog-russian");
+        assertEquals("Поиск и приложения", catalog.getString(R.string.center_title));
+        instrumentation.runOnMainSync(catalog::finish); instrumentation.waitForIdleSync();
         instrumentation.runOnMainSync(home::finish); instrumentation.waitForIdleSync();
     }
     @Test public void studioChangesPaletteAndStaticModeStopsTheLoop() throws Exception {

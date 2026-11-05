@@ -129,7 +129,7 @@ public final class LauncherToolsActivity extends ToolsActivityBase {
         ToolNetwork current = new ToolNetwork(); network = current;
         task = worker.submit(() -> {
             try { operation.run(current); }
-            catch (Exception e) { result(current, () -> status.setText(label + "\nНе удалось выполнить операцию. Проверьте подключение, выбранный файл и доступность сервиса. " + e.getClass().getSimpleName())); }
+            catch (Exception e) { result(current, () -> status.setText(label + "\nНе удалось выполнить операцию. Проверьте подключение, выбранный файл и доступность сервиса. ")); }
             finally { current.close(); }
         });
     }
@@ -223,10 +223,10 @@ public final class LauncherToolsActivity extends ToolsActivityBase {
     private void chooseUninstall() {
         Map<String, String> apps = new TreeMap<>();
         for (android.content.pm.ResolveInfo r : getPackageManager().queryIntentActivities(new Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LEANBACK_LAUNCHER), 0)) {
-            if ((r.activityInfo.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) == 0 && !r.activityInfo.packageName.equals(getPackageName())) apps.put(r.activityInfo.packageName, r.loadLabel(getPackageManager()).toString());
+            if ((r.activityInfo.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) == 0 && !r.activityInfo.packageName.equals(getPackageName())) apps.put(r.activityInfo.packageName, AppLabels.label(this, r));
         }
         for (android.content.pm.ResolveInfo r : getPackageManager().queryIntentActivities(new Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER), 0)) {
-            if ((r.activityInfo.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) == 0 && !r.activityInfo.packageName.equals(getPackageName())) apps.put(r.activityInfo.packageName, r.loadLabel(getPackageManager()).toString());
+            if ((r.activityInfo.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) == 0 && !r.activityInfo.packageName.equals(getPackageName())) apps.put(r.activityInfo.packageName, AppLabels.label(this, r));
         }
         if (apps.isEmpty()) { message("Нет доступных пользовательских приложений"); return; }
         List<String> packages = new ArrayList<>(apps.keySet()); packages.sort((a, b) -> apps.get(a).compareToIgnoreCase(apps.get(b)));
@@ -240,7 +240,7 @@ public final class LauncherToolsActivity extends ToolsActivityBase {
             if ((app.flags & ApplicationInfo.FLAG_SYSTEM) != 0 || pkg.equals(activity.getPackageName())) {
                 Toast.makeText(activity, "Системные приложения и сам лаунчер здесь не удаляются", Toast.LENGTH_LONG).show(); return;
             }
-            new LauncherDialogBuilder(activity).setTitle("Удалить «" + activity.getPackageManager().getApplicationLabel(app) + "»?")
+            new LauncherDialogBuilder(activity).setTitle("Удалить «" + AppLabels.application(activity, app) + "»?")
                     .setMessage(pkg + "\nПриложение и его локальные данные будут удалены. Системный установщик запросит подтверждение.")
                     .setPositiveButton("Продолжить", (d, w) -> {
                         try { activity.startActivity(new Intent(Intent.ACTION_DELETE, Uri.parse("package:" + pkg))); }
@@ -303,10 +303,12 @@ public final class LauncherToolsActivity extends ToolsActivityBase {
         try { version = getPackageManager().getPackageInfo(getPackageName(), 0).versionName; } catch (PackageManager.NameNotFoundException ignored) {}
         android.os.StatFs fs = new android.os.StatFs(getFilesDir().getAbsolutePath());
         android.util.DisplayMetrics dm = getResources().getDisplayMetrics();
-        return "MetoxTV diagnostic report\nTime: " + new Date() + "\nVersion: " + version + "\nPackage: " + getPackageName()
-                + "\nManufacturer: " + android.os.Build.MANUFACTURER + "\nModel: " + android.os.Build.MODEL + "\nAndroid: " + android.os.Build.VERSION.RELEASE
-                + " (API " + android.os.Build.VERSION.SDK_INT + ")\nDisplay: " + dm.widthPixels + "x" + dm.heightPixels + " density=" + dm.density
-                + "\nFree storage: " + fs.getAvailableBytes() / 1048576 + " MB\nTile shape: " + PremiumPreferences.get(this).getString("tile_shape", "wide")
+        return "MetoxTV — диагностический отчёт\nВремя: " + java.text.DateFormat.getDateTimeInstance(java.text.DateFormat.MEDIUM, java.text.DateFormat.SHORT, LauncherLocale.RUSSIAN).format(new Date()) + "\nВерсия: " + version + "\nПакет: " + getPackageName()
+                + "\nПроизводитель: " + android.os.Build.MANUFACTURER + "\nМодель: " + android.os.Build.MODEL + "\nAndroid: " + android.os.Build.VERSION.RELEASE
+                + " (API " + android.os.Build.VERSION.SDK_INT + ")\nЭкран: " + dm.widthPixels + "×" + dm.heightPixels + " · плотность: " + dm.density
+                + "\nСвободное место: " + fs.getAvailableBytes() / 1048576 + " МБ\nФорма плиток: "
+                + ("square".equals(PremiumPreferences.get(this).getString("tile_shape", "wide")) ? "Квадратные"
+                : "compact".equals(PremiumPreferences.get(this).getString("tile_shape", "wide")) ? "Компактные" : "Широкие")
                 + "\n" + localConnection() + "\n\nОтчёт не содержит серийного номера, IP/MAC, паролей, списка приложений или системных логов. Никуда не отправлен автоматически.";
     }
     private void diagnostics() {
@@ -314,7 +316,7 @@ public final class LauncherToolsActivity extends ToolsActivityBase {
         new LauncherDialogBuilder(this).setTitle("Диагностика").setMessage(report)
                 .setPositiveButton("Сохранить TXT", (d, w) -> {
                     try { startActivityForResult(new Intent(Intent.ACTION_CREATE_DOCUMENT).addCategory(Intent.CATEGORY_OPENABLE)
-                            .setType("text/plain").putExtra(Intent.EXTRA_TITLE, "MetoxTV-diagnostics.txt"), SAVE_REPORT); }
+                            .setType("text/plain").putExtra(Intent.EXTRA_TITLE, "MetoxTV-отчёт.txt"), SAVE_REPORT); }
                     catch (ActivityNotFoundException e) { message("В прошивке нет сохранения файлов. Используйте «Поделиться» или фотографию отчёта."); }
                 }).setNeutralButton("Поделиться", (d, w) -> {
                     try { startActivity(Intent.createChooser(new Intent(Intent.ACTION_SEND).setType("text/plain").putExtra(Intent.EXTRA_TEXT, report), "Отправить отчёт")); }

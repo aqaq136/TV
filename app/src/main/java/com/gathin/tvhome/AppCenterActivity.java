@@ -120,7 +120,7 @@ public final class AppCenterActivity extends ToolsActivityBase {
                         if (info.activityInfo == null || !info.activityInfo.enabled || !info.activityInfo.exported) continue;
                         String pkg = info.activityInfo.packageName;
                         if (!pkg.equals(getPackageName()) && !entries.containsKey(pkg)) {
-                            entries.put(pkg, new Entry(pkg, info.loadLabel(pm).toString(), category.equals(Intent.CATEGORY_LEANBACK_LAUNCHER), info.activityInfo.applicationInfo.category));
+                            entries.put(pkg, new Entry(pkg, AppLabels.label(this, info), category.equals(Intent.CATEGORY_LEANBACK_LAUNCHER), info.activityInfo.applicationInfo.category));
                         }
                     }
                 }

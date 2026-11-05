@@ -171,7 +171,7 @@ final class VisualDashboard {
                     target = activity.getPackageManager().getLeanbackLaunchIntentForPackage(entry.getKey());
                     if (target == null) target = activity.getPackageManager().getLaunchIntentForPackage(entry.getKey());
                     if (target != null && !entry.getKey().equals(activity.getPackageName())) {
-                        pkg = entry.getKey(); label = activity.getPackageManager().getApplicationLabel(activity.getPackageManager().getApplicationInfo(pkg, 0)).toString(); break;
+                        pkg = entry.getKey(); label = AppLabels.application(activity, activity.getPackageManager().getApplicationInfo(pkg, 0)); break;
                     }
                 } catch (android.content.pm.PackageManager.NameNotFoundException | RuntimeException ignored) { target = null; }
             }

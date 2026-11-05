@@ -231,7 +231,7 @@ public final class LauncherSettingsActivity extends ToolsActivityBase {
             if (pkg.equals(getPackageName())) continue;
             boolean seen = false;
             for (String[] a : apps) seen |= a[1].equals(pkg);
-            if (!seen) apps.add(new String[]{r.loadLabel(pm).toString(), pkg});
+            if (!seen) apps.add(new String[]{AppLabels.label(this, r), pkg});
         }
         Collections.sort(apps, (a, b) -> a[0].compareToIgnoreCase(b[0]));
         String[] labels = new String[apps.size() + 1];
@@ -263,7 +263,7 @@ public final class LauncherSettingsActivity extends ToolsActivityBase {
         if (pkg.isEmpty()) return getString(R.string.off);
         try {
             PackageManager pm = getPackageManager();
-            return pm.getApplicationLabel(pm.getApplicationInfo(pkg, 0)).toString();
+            return AppLabels.application(this, pm.getApplicationInfo(pkg, 0));
         } catch (PackageManager.NameNotFoundException e) {
             return pkg;
         }

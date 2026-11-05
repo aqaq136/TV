@@ -304,9 +304,9 @@ final class AppLibraryDialog {
         return value;
     }
 
-    private static String loadLabel(PackageManager pm, ResolveInfo app) {
+    private String loadLabel(PackageManager pm, ResolveInfo app) {
         String pkg = app.activityInfo.packageName;
-        try { return Cards.cleanLabel(String.valueOf(app.loadLabel(pm)), pkg); }
+        try { return Cards.cleanLabel(AppLabels.label(activity, app), pkg); }
         catch (RuntimeException unavailable) { return pkg; }
     }
 

@@ -109,7 +109,7 @@ final class PremiumHome {
             if (launch == null) launch = pm.getLaunchIntentForPackage(pkg);
             if (launch == null) continue;
             try {
-                TextView button = button(pm.getApplicationLabel(pm.getApplicationInfo(pkg, 0)).toString(), pkg, 86);
+                TextView button = button(AppLabels.application(activity, pm.getApplicationInfo(pkg, 0)), pkg, 86);
                 Drawable icon = pm.getApplicationIcon(pkg);
                 icon.setBounds(0, 0, dp(24), dp(24));
                 button.setCompoundDrawables(null, icon, null, null);

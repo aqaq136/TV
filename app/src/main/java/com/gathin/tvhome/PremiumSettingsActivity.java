@@ -109,7 +109,7 @@ public final class PremiumSettingsActivity extends ToolsActivityBase {
         for (String category : new String[]{Intent.CATEGORY_LEANBACK_LAUNCHER, Intent.CATEGORY_LAUNCHER}) {
             for (ResolveInfo info : getPackageManager().queryIntentActivities(new Intent(Intent.ACTION_MAIN).addCategory(category), 0)) {
                 String pkg = info.activityInfo.packageName;
-                if (!pkg.equals(getPackageName())) installed.put(pkg, info.loadLabel(getPackageManager()).toString());
+                if (!pkg.equals(getPackageName())) installed.put(pkg, AppLabels.label(this, info));
             }
         }
         List<String> packages = new ArrayList<>(installed.keySet());
