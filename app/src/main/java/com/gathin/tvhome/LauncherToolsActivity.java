@@ -51,7 +51,8 @@ public final class LauncherToolsActivity extends ToolsActivityBase {
         row(rows, "Форма плиток", this::chooseShape);
         row(rows, "Погода — выбрать город", this::chooseCity);
         row(rows, "Обновить погоду", this::weather);
-        row(rows, "Погода: Яндекс, источник и обновление", this::weather);
+        row(rows, "Погода без ключей", this::weather);
+        row(rows, "Очистить ОЗУ", () -> startActivity(new Intent(this, MemoryActivity.class)));
         row(rows, "Подключение и доступ в интернет", this::connection);
         row(rows, "Проверить скорость загрузки", () -> new LauncherDialogBuilder(this).setTitle("Проверить скорость?")
                 .setMessage("Будет скачано 10 МБ с Cloudflare. Это приблизительная скорость загрузки с одного сервера, не тарифная скорость и не проверка отдачи.")

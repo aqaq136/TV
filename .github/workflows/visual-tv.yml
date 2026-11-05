@@ -2,7 +2,7 @@ name: Android TV visual checks
 
 on:
   push:
-    branches: [codex/metoxtv-4-visual, codex/metoxtv-4.0.1-russian, codex/metoxtv-4.0.2-weather]
+    branches: [codex/metoxtv-4-visual, codex/metoxtv-4.0.1-russian, codex/metoxtv-4.0.2-weather, codex/metoxtv-4.0.3-simple]
     paths: ['app/**', 'tools/verify-tv.sh']
   pull_request:
     paths: ['app/**', '.github/workflows/visual-tv.yml']
@@ -17,7 +17,7 @@ concurrency:
 
 jobs:
   tv:
-    if: github.event_name != 'pull_request' || (github.head_ref != 'codex/metoxtv-4-visual' && github.head_ref != 'codex/metoxtv-4.0.1-russian' && github.head_ref != 'codex/metoxtv-4.0.2-weather')
+    if: github.event_name != 'pull_request' || (github.head_ref != 'codex/metoxtv-4-visual' && github.head_ref != 'codex/metoxtv-4.0.1-russian' && github.head_ref != 'codex/metoxtv-4.0.2-weather' && github.head_ref != 'codex/metoxtv-4.0.3-simple')
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -42,6 +42,8 @@ jobs:
           disable-animations: false
           emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -camera-back none -skin 1920x1080
           script: bash tools/verify-tv.sh
+      - name: Verify real weather responses without API keys
+        run: bash ./gradlew :app:checkLiveWeather --no-daemon --max-workers=2
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -58,7 +60,7 @@ jobs:
 
   publish-preview:
     needs: tv
-    if: github.event_name == 'push' && (github.ref_name == 'codex/metoxtv-4-visual' || github.ref_name == 'codex/metoxtv-4.0.1-russian' || github.ref_name == 'codex/metoxtv-4.0.2-weather')
+    if: github.event_name == 'push' && (github.ref_name == 'codex/metoxtv-4-visual' || github.ref_name == 'codex/metoxtv-4.0.1-russian' || github.ref_name == 'codex/metoxtv-4.0.2-weather' || github.ref_name == 'codex/metoxtv-4.0.3-simple')
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -70,7 +72,7 @@ jobs:
           path: work/rendered
       - name: Save actual emulator captures in a separate preview branch
         env:
-          PREVIEW_BRANCH: codex/tv-preview-${{ github.run_id }}
+          PREVIEW_BRANCH: codex/capture-${{ github.run_id }}-${{ github.run_attempt }}
         run: |
           mkdir -p docs/screenshots
           cp work/rendered/* docs/screenshots/

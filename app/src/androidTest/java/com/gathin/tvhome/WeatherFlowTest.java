@@ -21,10 +21,9 @@ public class WeatherFlowTest {
     private final Instrumentation ins = InstrumentationRegistry.getInstrumentation();
     private final Context context = ins.getTargetContext();
     private WeatherController controller;
-    private static final String JSON = "{\"fact\":{\"temp\":20,\"condition\":\"overcast\",\"wind_speed\":2}}";
     @Before public void setup() {
         PremiumPreferences.get(context).edit().clear().apply();
-        WeatherStore.credentials(context).edit().clear().putString("yandex_key", "test-key-not-a-real-credential").putBoolean("yandex_enabled", true).apply();
+        WeatherStore.useFreeSources(context);
         WeatherStore.select(context, new WeatherData.City("Первый город", 55, 37));
     }
     @After public void cleanup() {
@@ -42,7 +41,8 @@ public class WeatherFlowTest {
             if (opened != null) opened.countDown();
             if (release != null) try { if (!release.await(5, TimeUnit.SECONDS)) throw new java.io.IOException("Fixture timeout"); }
                 catch (InterruptedException e) { Thread.currentThread().interrupt(); throw new java.io.InterruptedIOException(); }
-            return new ByteArrayInputStream(JSON.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+            String body = "{\"properties\":{\"meta\":{\"units\":{\"air_temperature\":\"celsius\",\"wind_speed\":\"m/s\"}},\"timeseries\":[{\"time\":\"" + java.time.Instant.now().toString() + "\",\"data\":{\"instant\":{\"details\":{\"air_temperature\":20,\"wind_speed\":2}}}}]}}";
+            return new ByteArrayInputStream(body.getBytes(java.nio.charset.StandardCharsets.UTF_8));
         }
         public String getCipherSuite() { return "test"; }
         public java.security.cert.Certificate[] getLocalCertificates() { return null; }
@@ -57,10 +57,10 @@ public class WeatherFlowTest {
         });
         return done;
     }
-    @Test public void successfulYandexResponseIsCachedAnd403PreservesIt() throws Exception {
+    @Test public void publicSourceResponseIsCachedAndFailurePreservesIt() throws Exception {
         java.util.concurrent.atomic.AtomicInteger calls = new java.util.concurrent.atomic.AtomicInteger();
         CountDownLatch done = start(200, null, null, calls); assertTrue(done.await(5, TimeUnit.SECONDS)); ins.waitForIdleSync();
-        assertEquals("Яндекс Погода", PremiumPreferences.get(context).getString("weather_source", ""));
+        assertEquals("MET Norway", PremiumPreferences.get(context).getString("weather_source", ""));
         String previous = PremiumPreferences.get(context).getString("weather_summary", ""); assertTrue(previous.contains("+20 °C"));
         long time = PremiumPreferences.get(context).getLong("weather_time", 0); assertTrue(time > 0);
         ins.runOnMainSync(controller::close);
@@ -69,8 +69,8 @@ public class WeatherFlowTest {
         done = start(403, null, null, calls); assertTrue(done.await(5, TimeUnit.SECONDS)); ins.waitForIdleSync();
         assertEquals(previous, PremiumPreferences.get(context).getString("weather_summary", ""));
         assertEquals(time - WeatherPolicy.REFRESH, PremiumPreferences.get(context).getLong("weather_time", 0));
-        assertTrue(PremiumPreferences.get(context).getString("weather_error", "").contains("ключ"));
-        ins.runOnMainSync(() -> controller.refresh(false)); ins.waitForIdleSync(); assertEquals(2, calls.get());
+        assertTrue(PremiumPreferences.get(context).getString("weather_error", "").contains("источников"));
+        ins.runOnMainSync(() -> controller.refresh(false)); ins.waitForIdleSync(); assertEquals(3, calls.get());
     }
     @Test public void changingCityDiscardsAnOlderInFlightResponse() throws Exception {
         CountDownLatch opened = new CountDownLatch(1), release = new CountDownLatch(1);

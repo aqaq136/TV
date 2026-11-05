@@ -61,10 +61,11 @@ final class VisualDashboard {
         action(bar, R.string.visual_studio, () -> activity.startActivity(new Intent(activity, VisualSettingsActivity.class)));
         timer = action(bar, R.string.visual_timer, this::chooseTimer);
         action(bar, R.string.visual_tools, () -> activity.startActivity(new Intent(activity, LauncherToolsActivity.class)));
+        action(bar, R.string.memory_clean, () -> activity.startActivity(new Intent(activity, MemoryActivity.class)));
         View weather = activity.findViewById(R.id.visualWeather);
         weather.setOnClickListener(v -> activity.startActivity(new Intent(activity, WeatherActivity.class)));
         View stats = activity.findViewById(R.id.visualDevice);
-        stats.setOnClickListener(v -> activity.startActivity(new Intent(activity, LauncherToolsActivity.class)));
+        stats.setOnClickListener(v -> activity.startActivity(new Intent(activity, MemoryActivity.class)));
         for (View v : new View[]{continueButton, weather, stats}) {
             v.setOnKeyListener((view, code, event) -> {
                 if (event.getAction() == KeyEvent.ACTION_DOWN && code == KeyEvent.KEYCODE_DPAD_DOWN) { actions.get(0).requestFocus(); return true; }

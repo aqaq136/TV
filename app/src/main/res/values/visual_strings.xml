@@ -41,4 +41,5 @@
     <string name="category_button">Категория · %1$s</string>
     <string name="category_assign">Выбрать категорию…</string>
     <string name="category_automatic">Автоматически</string>
+    <string name="memory_clean">Очистить ОЗУ</string>
 </resources>

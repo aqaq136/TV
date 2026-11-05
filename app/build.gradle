@@ -13,8 +13,8 @@ android {
         applicationId providers.gradleProperty('launcherApplicationId').getOrElse('com.gathin.tvhome')
         minSdk 26
         targetSdk 34
-        versionCode 19
-        versionName '4.0.2'
+        versionCode 20
+        versionName '4.0.3'
         resourceConfigurations += ['ru']
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
     }
@@ -52,4 +52,14 @@ dependencies {
     testImplementation 'org.json:json:20240303'
     androidTestImplementation 'androidx.test:runner:1.5.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
+}
+
+// Deliberate live smoke check, separate from deterministic unit tests.
+// Only called by the Android TV workflow when application source changes.
+afterEvaluate {
+    tasks.register('checkLiveWeather', JavaExec) {
+        dependsOn 'testDebugUnitTest'
+        classpath = files(provider { tasks.named('testDebugUnitTest').get().classpath })
+        mainClass = 'com.gathin.tvhome.LiveWeatherCheck'
+    }
 }
