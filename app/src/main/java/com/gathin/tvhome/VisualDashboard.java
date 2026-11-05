@@ -60,6 +60,7 @@ final class VisualDashboard {
         action(bar, R.string.center_recent, () -> apps(2));
         action(bar, R.string.visual_studio, () -> activity.startActivity(new Intent(activity, VisualSettingsActivity.class)));
         timer = action(bar, R.string.visual_timer, this::chooseTimer);
+        action(bar, R.string.visual_tools, () -> activity.startActivity(new Intent(activity, LauncherToolsActivity.class)));
         View weather = activity.findViewById(R.id.visualWeather);
         weather.setOnClickListener(v -> activity.startActivity(new Intent(activity, LauncherToolsActivity.class).putExtra("action", "weather")));
         View stats = activity.findViewById(R.id.visualDevice);
@@ -151,10 +152,9 @@ final class VisualDashboard {
             heroIcon.animate().alpha(.65f).rotation(0).scaleX(1).scaleY(1).setDuration(320).start();
         } else { title.setAlpha(1); title.setTranslationY(0); heroIcon.setAlpha(.65f); }
     }
-    void refreshStatus() {
+    void refreshStatus(String ram, String storage) {
         if (atmosphere == null) return;
-        TextView ram = activity.findViewById(R.id.erokhinMemory), storage = activity.findViewById(R.id.erokhinStorage);
-        ((TextView) activity.findViewById(R.id.visualDeviceText)).setText(activity.getString(R.string.visual_device_info, ram.getText(), storage.getText()));
+        ((TextView) activity.findViewById(R.id.visualDeviceText)).setText(activity.getString(R.string.visual_device_info, ram, storage));
         refreshTimer();
     }
     private void refreshRecent() {

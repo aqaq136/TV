@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="visual_tools">Инструменты</string>
     <string name="visual_studio">Визуальная студия</string>
     <string name="visual_welcome">Ваш вечер. Ваш экран.</string>
     <string name="visual_open_hint">ОК — открыть · Удержание ОК — действия</string>
