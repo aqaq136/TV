@@ -11,7 +11,7 @@ if errorlevel 1 (
 )
 echo Connected devices:
 "%ADB%" devices
-echo Installing MetoxTV 3.5.0 without deleting settings...
+echo Installing MetoxTV 4.0.0 without deleting settings...
 "%ADB%" install -r "MetoxTV.apk"
 if errorlevel 1 (
  echo Installation failed. See INSTALL_RU.txt. Signature conflicts require a manual decision.

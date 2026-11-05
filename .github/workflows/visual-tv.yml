@@ -3,6 +3,7 @@ name: Android TV visual checks
 on:
   push:
     branches: [codex/metoxtv-4-visual]
+    paths: ['app/**', 'tools/verify-tv.sh']
   pull_request:
     paths: ['app/**', '.github/workflows/visual-tv.yml']
   workflow_dispatch:
