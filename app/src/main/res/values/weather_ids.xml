@@ -1,0 +1,6 @@
+<resources>
+    <item type="id" name="weatherSource" />
+    <item type="id" name="weatherStatus" />
+    <item type="id" name="weatherUpdate" />
+    <item type="id" name="weatherCity" />
+</resources>

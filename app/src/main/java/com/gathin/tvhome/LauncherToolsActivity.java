@@ -51,7 +51,7 @@ public final class LauncherToolsActivity extends ToolsActivityBase {
         row(rows, "Форма плиток", this::chooseShape);
         row(rows, "Погода — выбрать город", this::chooseCity);
         row(rows, "Обновить погоду", this::weather);
-        row(rows, "Убрать погоду с главного экрана", () -> { PremiumPreferences.get(this).edit().remove("weather_summary").remove("weather_time").apply(); status.setText("Погода скрыта. Город сохранён."); });
+        row(rows, "Погода: Яндекс, источник и обновление", this::weather);
         row(rows, "Подключение и доступ в интернет", this::connection);
         row(rows, "Проверить скорость загрузки", () -> new LauncherDialogBuilder(this).setTitle("Проверить скорость?")
                 .setMessage("Будет скачано 10 МБ с Cloudflare. Это приблизительная скорость загрузки с одного сервера, не тарифная скорость и не проверка отдачи.")
@@ -160,43 +160,9 @@ public final class LauncherToolsActivity extends ToolsActivityBase {
                 }).setNegativeButton("Отмена", null).show();
     }
     private void chooseCity() {
-        EditText input = new EditText(this); input.setSingleLine(true); input.setHint("Например, Москва");
-        input.setFilters(new android.text.InputFilter[]{new android.text.InputFilter.LengthFilter(80)});
-        new LauncherDialogBuilder(this).setTitle("Город · Open-Meteo").setView(input)
-                .setMessage("Название города отправится в Open-Meteo. Доступ к геолокации не требуется.")
-                .setPositiveButton("Найти", (d, w) -> {
-                    String name = input.getText().toString().trim();
-                    if (name.length() < 2) { message("Введите хотя бы два символа"); return; }
-                    run("Поиск города…", net -> {
-                        List<WeatherData.City> cities = WeatherData.cities(net.json("https://geocoding-api.open-meteo.com/v1/search?name="
-                                + java.net.URLEncoder.encode(name, "UTF-8") + "&count=8&language=ru&format=json"));
-                        result(net, () -> {
-                            if (cities.isEmpty()) { status.setText("Город не найден. Попробуйте другое название."); return; }
-                            String[] labels = new String[cities.size()]; for (int i = 0; i < labels.length; i++) labels[i] = cities.get(i).title;
-                            new LauncherDialogBuilder(this).setTitle("Уточните город").setItems(labels, (dialog, which) -> {
-                                WeatherData.City c = cities.get(which);
-                                PremiumPreferences.get(this).edit().putString("weather_city", c.title).putString("latitude", Double.toString(c.latitude))
-                                        .putString("longitude", Double.toString(c.longitude)).remove("weather_summary").apply(); weather();
-                            }).setNegativeButton("Отмена", null).show();
-                        });
-                    });
-                }).setNegativeButton("Отмена", null).show();
+        startActivity(new Intent(this, WeatherActivity.class).putExtra("choose_city", true));
     }
-    private void weather() {
-        android.content.SharedPreferences p = PremiumPreferences.get(this);
-        if (!p.contains("latitude")) { chooseCity(); return; }
-        final WeatherData.City city;
-        try { city = new WeatherData.City(p.getString("weather_city", "Город"), Double.parseDouble(p.getString("latitude", "")), Double.parseDouble(p.getString("longitude", ""))); }
-        catch (RuntimeException e) { chooseCity(); return; }
-        run("Получение погоды…", net -> {
-            String summary = WeatherData.current(net.json("https://api.open-meteo.com/v1/forecast?latitude=" + city.latitude
-                    + "&longitude=" + city.longitude + "&current=temperature_2m,weather_code,wind_speed_10m&timezone=auto"));
-            result(net, () -> {
-                p.edit().putString("weather_summary", summary).putLong("weather_time", System.currentTimeMillis()).apply();
-                status.setText(city.title + "\n" + summary + "\nИсточник: Open-Meteo · обновлено сейчас. На главном экране показывается сохранённая сводка.");
-            });
-        });
-    }
+    private void weather() { startActivity(new Intent(this, WeatherActivity.class)); }
     private String localConnection() {
         ConnectivityManager cm = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
         Network active = cm.getActiveNetwork(); NetworkCapabilities caps = cm.getNetworkCapabilities(active);

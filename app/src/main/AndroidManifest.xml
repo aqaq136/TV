@@ -115,6 +115,7 @@
         <activity android:name=".VisualSettingsActivity" android:exported="false" android:screenOrientation="landscape" />
         <activity android:name=".BackupActivity" android:exported="false" android:screenOrientation="landscape" />
         <activity android:name=".LauncherToolsActivity" android:exported="false" android:screenOrientation="landscape" />
+        <activity android:name=".WeatherActivity" android:exported="false" android:screenOrientation="landscape" />
         <activity android:name=".PremiumSettingsActivity" android:exported="false"
             android:screenOrientation="landscape" />
         <activity

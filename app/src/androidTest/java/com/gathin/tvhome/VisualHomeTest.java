@@ -23,6 +23,8 @@ public class VisualHomeTest {
     private final Instrumentation instrumentation = InstrumentationRegistry.getInstrumentation();
     @Before public void resetVisualPreferences() {
         android.content.Context context = instrumentation.getTargetContext(); VisualPreferences.migrate(context);
+        PremiumPreferences.get(context).edit().remove("weather_city").remove("latitude").remove("longitude").remove("weather_hidden").apply();
+        WeatherStore.clearCache(context); WeatherStore.credentials(context).edit().clear().apply();
         PremiumPreferences.get(context).edit().putString("visual_palette", "cosmos").putString("visual_scene", "aurora")
                 .putInt("visual_quality", 2).putBoolean("visual_motion", true).apply();
         context.getSharedPreferences(Config.SETTINGS_NAME,0).edit().putBoolean("animations", true).apply();
@@ -99,5 +101,37 @@ public class VisualHomeTest {
         screenshot("sunset-horizon-static");
         prefs.edit().putString("visual_palette", "cosmos").putString("visual_scene", "aurora").putInt("visual_quality", 2).apply();
         instrumentation.runOnMainSync(home::finish); instrumentation.waitForIdleSync();
+    }
+    @Test public void weatherSetupAndCachedYandexSourceAreReadableWithRemote() throws Exception {
+        android.content.Context context = instrumentation.getTargetContext();
+        Activity weather = start(WeatherActivity.class);
+        instrumentation.runOnMainSync(() -> {
+            assertTrue(((android.widget.TextView)weather.findViewById(R.id.weatherSource)).getText().toString().contains("Яндекс API не подключён"));
+            assertEquals("Выбрать город →", ((android.widget.TextView)weather.findViewById(R.id.weatherStatus)).getText().toString());
+            assertTrue(weather.findViewById(R.id.weatherUpdate).hasFocus());
+        });
+        SystemClock.sleep(650); screenshot("weather-setup");
+        instrumentation.sendKeyDownUpSync(KeyEvent.KEYCODE_DPAD_DOWN); instrumentation.waitForIdleSync();
+        instrumentation.runOnMainSync(() -> { assertEquals(R.id.weatherCity, weather.getCurrentFocus().getId()); weather.finish(); });
+        instrumentation.waitForIdleSync();
+        // Explicit cached test fixture; no real API access or fabricated live weather is claimed.
+        WeatherStore.select(context, new WeatherData.City("Тестовый город", 55.75, 37.62));
+        WeatherStore.credentials(context).edit().putString("yandex_key", "test-key-not-a-real-credential").putBoolean("yandex_enabled", true).apply();
+        PremiumPreferences.get(context).edit().putString("weather_summary", "+20 °C · Пасмурно · ветер 2 м/с")
+                .putString("weather_source", "Яндекс Погода").putLong("weather_time", System.currentTimeMillis()).apply();
+        Activity cached = start(WeatherActivity.class);
+        instrumentation.runOnMainSync(() -> {
+            String text = ((android.widget.TextView)cached.findViewById(R.id.weatherStatus)).getText().toString();
+            assertTrue(text.contains("Тестовый город"));
+            assertTrue(((android.widget.TextView)cached.findViewById(R.id.weatherSource)).getText().toString().contains("Яндекс Погода"));
+            assertTrue(text.contains("+20 °C"));
+        });
+        SystemClock.sleep(650); screenshot("weather-cached-fixture");
+        instrumentation.runOnMainSync(cached::finish); instrumentation.waitForIdleSync();
+        Activity home = start(MainActivity.class);
+        instrumentation.runOnMainSync(() -> assertTrue(((android.widget.TextView)home.findViewById(R.id.premiumSubtitle)).getText().toString().contains("Яндекс Погода")));
+        instrumentation.runOnMainSync(home::finish); instrumentation.waitForIdleSync();
+        PremiumPreferences.get(context).edit().remove("latitude").remove("longitude").remove("weather_city").apply();
+        WeatherStore.clearCache(context); WeatherStore.credentials(context).edit().clear().apply();
     }
 }

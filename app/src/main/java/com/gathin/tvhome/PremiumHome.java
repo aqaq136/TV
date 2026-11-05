@@ -27,10 +27,12 @@ final class PremiumHome {
     private boolean restoreAfterLaunch;
     private final LinearLayout favorites;
     private final VisualDashboard dashboard;
+    private final WeatherController weather;
 
     PremiumHome(Activity activity, Runnable returnToGrid) {
         this.activity = activity;
         this.returnToGrid = returnToGrid;
+        weather = new WeatherController(activity, this::refreshStatus);
         VisualPreferences.migrate(activity);
         dashboard = new VisualDashboard(activity, returnToGrid);
         density = activity.getResources().getDisplayMetrics().density;
@@ -49,9 +51,9 @@ final class PremiumHome {
                     .setDuration(animate ? 140 : 0).start();
         });
     }
-    void resume() { dashboard.resume(); }
-    void pause() { dashboard.pause(); }
-    void close() { dashboard.close(); }
+    void resume() { dashboard.resume(); weather.resume(); }
+    void pause() { dashboard.pause(); weather.pause(); }
+    void close() { dashboard.close(); weather.close(); }
     void focused(String label, String pkg, Drawable icon, int accent, View tile) { dashboard.focused(label, pkg, icon, accent, tile); }
     void refreshFavorites() {
         if (favorites == null) return;
@@ -147,15 +149,8 @@ final class PremiumHome {
         String ram = String.format(Locale.getDefault(), "ОЗУ · %.1f ГБ", memory().availMem / 1073741824.0);
         TextView subtitle = activity.findViewById(R.id.premiumSubtitle);
         if (subtitle != null) {
-            android.content.SharedPreferences prefs = PremiumPreferences.get(activity);
-            String weather = prefs.getString("weather_summary", "");
-            long time = prefs.getLong("weather_time", 0);
-            if (!weather.isEmpty()) {
-                String city = prefs.getString("weather_city", "").split(",")[0];
-                String saved = android.text.format.DateFormat.format("dd.MM HH:mm", time).toString();
-                subtitle.setText(city + " · " + weather + " · " + saved);
-                subtitle.setTextSize(10); subtitle.setMaxLines(2);
-            } else { subtitle.setText(R.string.visual_weather_choose); subtitle.setTextSize(11); }
+            subtitle.setText(WeatherStore.summary(activity, false)); subtitle.setTextSize(10); subtitle.setMaxLines(2);
+            activity.findViewById(R.id.visualWeather).setVisibility(PremiumPreferences.get(activity).getBoolean("weather_hidden", false) ? View.GONE : View.VISIBLE);
         }
         StatFs storage = new StatFs(activity.getFilesDir().getAbsolutePath());
         String available = String.format(Locale.getDefault(), "Свободно · %.1f ГБ", storage.getAvailableBytes() / 1073741824.0);

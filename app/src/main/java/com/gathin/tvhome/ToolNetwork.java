@@ -7,23 +7,42 @@ import java.io.ByteArrayOutputStream;
 
 /** Bounded HTTPS-only requests; TLS and hostname verification use Android defaults. */
 final class ToolNetwork implements AutoCloseable {
+    interface Connections { HttpsURLConnection open(URL url) throws Exception; }
+    private final Connections connections;
+    ToolNetwork() { this(url -> (HttpsURLConnection) url.openConnection()); }
+    ToolNetwork(Connections connections) { this.connections = connections; }
+    static final class HttpException extends java.io.IOException {
+        final int status;
+        HttpException(int status) { super("HTTP " + status); this.status = status; }
+    }
     private volatile HttpsURLConnection active;
     private volatile boolean closed;
     private HttpsURLConnection connect(String address) throws Exception {
         if (closed || Thread.currentThread().isInterrupted()) throw new java.io.InterruptedIOException();
-        HttpsURLConnection c = (HttpsURLConnection) new URL(address).openConnection();
+        URL url = new URL(address);
+        if (!"https".equals(url.getProtocol())) throw new java.io.IOException("HTTPS required");
+        HttpsURLConnection c = connections.open(url);
         active = c;
         if (closed) { c.disconnect(); throw new java.io.InterruptedIOException(); }
         c.setConnectTimeout(8000); c.setReadTimeout(8000); c.setUseCaches(false);
         c.setInstanceFollowRedirects(false);
         c.setRequestProperty("Accept-Encoding", "identity");
-        c.setRequestProperty("User-Agent", "MetoxTV/3.4.1");
+        c.setRequestProperty("User-Agent", "MetoxTV/4.0.2");
         return c;
     }
     String json(String address) throws Exception {
-        HttpsURLConnection c = connect(address);
+        return json(connect(address));
+    }
+    String yandex(WeatherData.City city, String key, boolean informer) throws Exception {
+        if (!WeatherPolicy.validKey(key)) throw new IllegalArgumentException("Invalid key");
+        HttpsURLConnection c = connect(WeatherPolicy.yandexUrl(city, informer));
+        // Fixed HTTPS host, no redirects: the key is never forwarded to another service.
+        c.setRequestProperty("X-Yandex-Weather-Key", key);
+        return json(c);
+    }
+    private String json(HttpsURLConnection c) throws Exception {
         try {
-            if (c.getResponseCode() != 200) throw new java.io.IOException("HTTP " + c.getResponseCode());
+            if (c.getResponseCode() != 200) throw new HttpException(c.getResponseCode());
             ByteArrayOutputStream bytes = new ByteArrayOutputStream();
             try (InputStream stream = c.getInputStream()) {
                 byte[] buffer = new byte[8192]; int n;

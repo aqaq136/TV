@@ -1,0 +1,44 @@
+name: Recover TV captures
+
+on:
+  push:
+    branches: [codex/metoxtv-4.0.2-weather]
+    paths: ['.github/tv-captures.json']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  recover:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+      - name: Read capture request
+        id: request
+        run: |
+          python3 - <<'PY'
+          import json, os
+          run = str(json.load(open('.github/tv-captures.json'))['run_id'])
+          assert run.isdigit()
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as out:
+              out.write('run_id=' + run + '\n')
+          PY
+      - uses: actions/download-artifact@v4
+        with:
+          name: MetoxTV-TV-screenshots
+          path: work/rendered
+          run-id: ${{ steps.request.outputs.run_id }}
+          github-token: ${{ github.token }}
+      - name: Publish recovered captures
+        env:
+          CAPTURE_BRANCH: codex/recovered-tv-${{ github.run_id }}-${{ github.run_attempt }}
+        run: |
+          mkdir -p docs/screenshots
+          cp work/rendered/* docs/screenshots/
+          git switch -c "$CAPTURE_BRANCH"
+          git add docs/screenshots
+          git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m 'Recover verified Android TV captures from existing artifact'
+          git push origin "$CAPTURE_BRANCH"

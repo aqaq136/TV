@@ -34,8 +34,65 @@ final class WeatherData {
     static String current(String json) throws Exception {
         JSONObject c = new JSONObject(json).getJSONObject("current");
         double temperature = c.getDouble("temperature_2m"), wind = c.getDouble("wind_speed_10m");
-        if (!Double.isFinite(temperature) || !Double.isFinite(wind)) throw new IllegalArgumentException("Invalid weather");
+        if (!Double.isFinite(temperature) || temperature < -100 || temperature > 80 || !Double.isFinite(wind) || wind < 0 || wind > 540)
+            throw new IllegalArgumentException("Invalid weather");
         return String.format(Locale.getDefault(), "%+.0f °C · %s · ветер %.0f км/ч", temperature, code(c.getInt("weather_code")), wind);
+    }
+    static String yandex(String json) throws Exception {
+        JSONObject fact = new JSONObject(json).getJSONObject("fact");
+        double temperature = fact.getDouble("temp"), wind = fact.getDouble("wind_speed");
+        if (!Double.isFinite(temperature) || temperature < -100 || temperature > 80
+                || !Double.isFinite(wind) || wind < 0 || wind > 150) throw new IllegalArgumentException("Invalid weather");
+        return String.format(Locale.forLanguageTag("ru-RU"), "%+.0f °C · %s · ветер %.0f м/с", temperature,
+                condition(fact.getString("condition")), wind);
+    }
+    static String condition(String value) {
+        switch (value) {
+            case "clear": return "Ясно";
+            case "partly-cloudy": return "Малооблачно";
+            case "cloudy": return "Облачно с прояснениями";
+            case "overcast": return "Пасмурно";
+            case "drizzle": return "Морось";
+            case "light-rain": return "Небольшой дождь";
+            case "rain": return "Дождь";
+            case "moderate-rain": return "Умеренный дождь";
+            case "heavy-rain": case "continuous-heavy-rain": return "Сильный дождь";
+            case "showers": return "Ливень";
+            case "wet-snow": return "Дождь со снегом";
+            case "light-snow": return "Небольшой снег";
+            case "snow": return "Снег";
+            case "snow-showers": return "Снегопад";
+            case "hail": return "Град";
+            case "thunderstorm": return "Гроза";
+            case "thunderstorm-with-rain": return "Дождь с грозой";
+            case "thunderstorm-with-hail": return "Гроза с градом";
+            default: return "Без описания";
+        }
+    }
+    static List<City> presets() {
+        List<City> cities = new ArrayList<>();
+        cities.add(new City("Москва, Россия", 55.7558, 37.6173));
+        cities.add(new City("Санкт-Петербург, Россия", 59.9386, 30.3141));
+        cities.add(new City("Новосибирск, Россия", 55.0302, 82.9204));
+        cities.add(new City("Екатеринбург, Россия", 56.8389, 60.6057));
+        cities.add(new City("Казань, Россия", 55.7961, 49.1064));
+        cities.add(new City("Нижний Новгород, Россия", 56.3269, 44.0059));
+        cities.add(new City("Краснодар, Россия", 45.0355, 38.9753));
+        cities.add(new City("Сочи, Россия", 43.5855, 39.7231));
+        cities.add(new City("Ростов-на-Дону, Россия", 47.2357, 39.7015));
+        cities.add(new City("Самара, Россия", 53.1959, 50.1002));
+        cities.add(new City("Уфа, Россия", 54.7388, 55.9721));
+        cities.add(new City("Красноярск, Россия", 56.0153, 92.8932));
+        cities.add(new City("Воронеж, Россия", 51.6608, 39.2003));
+        cities.add(new City("Пермь, Россия", 58.0105, 56.2502));
+        cities.add(new City("Волгоград, Россия", 48.708, 44.5133));
+        cities.add(new City("Омск, Россия", 54.9885, 73.3242));
+        cities.add(new City("Челябинск, Россия", 55.1644, 61.4368));
+        cities.add(new City("Калининград, Россия", 54.7104, 20.4522));
+        cities.add(new City("Владивосток, Россия", 43.1155, 131.8855));
+        cities.add(new City("Минск, Беларусь", 53.9006, 27.559));
+        cities.add(new City("Алматы, Казахстан", 43.2389, 76.8897));
+        return cities;
     }
     static String code(int code) {
         if (code == 0) return "Ясно";
