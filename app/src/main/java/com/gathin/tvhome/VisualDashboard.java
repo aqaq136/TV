@@ -104,7 +104,7 @@ final class VisualDashboard {
     void style() {
         if (atmosphere == null) return;
         android.content.SharedPreferences p = PremiumPreferences.get(activity);
-        animate = p.getBoolean("visual_motion", true) && Config.load(activity).animations;
+        animate = Config.load(activity).animations;
         atmosphere.configure();
         VisualPalette palette = VisualPalette.of(p.getString("visual_palette", "cosmos"));
         for (int id : new int[]{R.id.visualHeroPanel, R.id.visualWeather, R.id.visualDevice}) {

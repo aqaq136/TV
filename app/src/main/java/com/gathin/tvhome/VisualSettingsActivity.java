@@ -13,6 +13,7 @@ public final class VisualSettingsActivity extends ToolsActivityBase {
     private SharedPreferences prefs;
     private AtmosphereView preview;
     private LinearLayout rows;
+    private final java.util.List<Runnable> toggleRefreshes = new java.util.ArrayList<>();
     @Override protected void onCreate(Bundle state) {
         super.onCreate(state); prefs = PremiumPreferences.get(this);
         LinearLayout root = new LinearLayout(this); root.setOrientation(LinearLayout.HORIZONTAL);
@@ -69,9 +70,18 @@ public final class VisualSettingsActivity extends ToolsActivityBase {
     private void toggle(int label, String key, boolean fallback) {
         TextView view = row(label, () -> {});
         Runnable refresh = () -> view.setText(getString(R.string.visual_toggle, getString(label), getString(prefs.getBoolean(key, fallback) ? R.string.on : R.string.off)));
-        view.setOnClickListener(v -> { prefs.edit().putBoolean(key, !prefs.getBoolean(key, fallback)).apply(); changed(); refresh.run(); }); refresh.run();
+        toggleRefreshes.add(refresh);
+        view.setOnClickListener(v -> {
+            boolean enabled = !prefs.getBoolean(key, fallback);
+            SharedPreferences.Editor edit = prefs.edit().putBoolean(key, enabled);
+            if (key.equals("visual_motion") && enabled) {
+                edit.putInt("visual_quality", Math.max(1, prefs.getInt("visual_quality", 2)));
+                getSharedPreferences(Config.SETTINGS_NAME, MODE_PRIVATE).edit().putBoolean("animations", true).apply();
+            }
+            edit.apply(); changed(); refresh.run();
+        }); refresh.run();
     }
-    private void changed() { PremiumPreferences.changed(this); preview.configure(); }
+    private void changed() { PremiumPreferences.changed(this); preview.configure(); for (Runnable refresh : toggleRefreshes) refresh.run(); }
     @Override protected void onResume() { super.onResume(); if (preview != null) { preview.configure(); preview.setActive(true); } }
     @Override protected void onPause() { if (preview != null) preview.setActive(false); super.onPause(); }
 }

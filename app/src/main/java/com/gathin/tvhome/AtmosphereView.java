@@ -104,7 +104,7 @@ public final class AtmosphereView extends View {
             for (int i = 0; i < count; i++) {
                 float s = stars[i * 3 + 2];
                 float x = (stars[i * 3] * w + dx * s + w) % w;
-                float y = (stars[i * 3 + 1] * h - (motion ? t * (1 + s) : 0) + dy * s + h * 100) % h;
+                float y = ((stars[i * 3 + 1] * h - (motion ? t * (1 + s) : 0) + dy * s) % h + h) % h;
                 int alpha = (int) (35 + 65 * (.5 + .5 * Math.sin(t * .6 + i)));
                 paint.setColor(VisualPalette.alpha(i % 3 == 0 ? palette.primary : 0xFFFFFFFF, alpha));
                 canvas.drawCircle(x, y, (1 + s) * getResources().getDisplayMetrics().density * .45f, paint);

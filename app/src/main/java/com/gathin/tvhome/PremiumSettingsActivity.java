@@ -47,12 +47,7 @@ public final class PremiumSettingsActivity extends ToolsActivityBase {
         row(getString(R.string.center_title), () -> startActivity(new Intent(this, AppCenterActivity.class)));
         row(getString(R.string.backup_title), () -> startActivity(new Intent(this, BackupActivity.class)));
         row("Имя в приветствии", this::editName);
-        row("Цветовая тема", () -> new LauncherDialogBuilder(this).setTitle("Цветовая тема")
-                .setSingleChoiceItems(new String[]{"Неон · голубой и фиолетовый", "Аврора · бирюзовый", "Спокойная · приглушённые волны"},
-                        java.util.Arrays.asList("neon", "aurora", "calm").indexOf(prefs.getString("theme", "neon")), (d, which) -> {
-                            prefs.edit().putString("theme", new String[]{"neon", "aurora", "calm"}[which]).putBoolean("custom_wallpaper", false).apply();
-                            changed(); d.dismiss();
-                        }).setNegativeButton("Отмена", null).show());
+        row(getString(R.string.visual_palette), () -> startActivity(new Intent(this, VisualSettingsActivity.class)));
         row("Свои обои — выбрать изображение", () -> {
             Intent pick = new Intent(Intent.ACTION_OPEN_DOCUMENT).setType("image/*").addCategory(Intent.CATEGORY_OPENABLE);
             try { startActivityForResult(pick, WALLPAPER); }

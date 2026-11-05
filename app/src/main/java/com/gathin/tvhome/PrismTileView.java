@@ -6,6 +6,7 @@ import android.graphics.LinearGradient;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.Shader;
+import android.graphics.Matrix;
 import android.os.SystemClock;
 import android.util.AttributeSet;
 import android.widget.FrameLayout;
@@ -13,13 +14,15 @@ import android.widget.FrameLayout;
 /** One brief light sweep on focus, plus a subtle breathing rim on the single focused tile. */
 public final class PrismTileView extends FrameLayout {
     private final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private final Matrix sweepMatrix = new Matrix();
+    private final Shader sweep = new LinearGradient(0, 0, 1, 1, new int[]{0, 0x30FFFFFF, 0}, null, Shader.TileMode.CLAMP);
     private boolean active = true, motion, bloom;
     private long focusAt;
     private final Runnable frame = this::invalidate;
     public PrismTileView(Context context, AttributeSet attrs) {
         super(context, attrs);
         android.content.SharedPreferences p = PremiumPreferences.get(context);
-        motion = p.getBoolean("visual_shimmer", true) && p.getBoolean("visual_motion", true)
+        motion = p.getBoolean("visual_shimmer", true)
                 && context.getSharedPreferences(Config.SETTINGS_NAME, Context.MODE_PRIVATE).getBoolean("animations", true);
         bloom = p.getBoolean("visual_bloom", true);
     }
@@ -36,8 +39,8 @@ public final class PrismTileView extends FrameLayout {
         float age = (SystemClock.elapsedRealtime() - focusAt) / 1000f;
         if (motion && age < .85f) {
             float x = -w + w * 3 * age / .85f;
-            paint.setShader(new LinearGradient(x, 0, x + w * .45f, h,
-                    new int[]{0, 0x30FFFFFF, 0}, null, Shader.TileMode.CLAMP));
+            sweepMatrix.setScale(w * .45f, h); sweepMatrix.postTranslate(x, 0); sweep.setLocalMatrix(sweepMatrix);
+            paint.setShader(sweep);
             c.drawRect(0, 0, w, h, paint); paint.setShader(null);
         }
         if (bloom) {
