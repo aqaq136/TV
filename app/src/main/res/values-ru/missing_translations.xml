@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="action_cancel">Отмена</string>
+    <string name="action_ok">ОК</string>
     <string name="good_forenoon">Доброе утро</string>
     <string name="premium_add_favorite">Добавить в избранное</string>
     <string name="premium_remove_favorite">Убрать из избранного</string>

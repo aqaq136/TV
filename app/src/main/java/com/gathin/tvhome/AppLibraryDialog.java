@@ -344,7 +344,7 @@ final class AppLibraryDialog {
 
     /** Reuse translated actions instead of shipping another hint in every locale. */
     private String hint(boolean home) {
-        if (selectionMode) return activity.getString(android.R.string.ok) + ": "
+        if (selectionMode) return activity.getString(R.string.action_ok) + ": "
                 + activity.getString(home ? R.string.library_remove_shortcut : R.string.library_add_home);
         return activity.getString(home || okOpens ? R.string.library_hint_open : R.string.library_hint_add);
     }

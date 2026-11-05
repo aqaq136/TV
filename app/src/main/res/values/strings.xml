@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="action_cancel">Отмена</string>
+    <string name="action_ok">ОК</string>
     <string name="app_name">MetoxTV</string>
     <string name="inputs">Источники</string>
     <string name="wifi">Wi-Fi</string>

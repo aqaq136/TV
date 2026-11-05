@@ -145,7 +145,7 @@ public final class LauncherSettingsActivity extends ToolsActivityBase {
                         .setTitle(R.string.advanced_effects)
                         .setMessage(R.string.advanced_effects_warning)
                         .setPositiveButton(R.string.enable, (dialog, which) -> setAdvanced(true))
-                        .setNegativeButton(android.R.string.cancel, null)
+                        .setNegativeButton(R.string.action_cancel, null)
                         .show();
             }
         });
@@ -217,7 +217,7 @@ public final class LauncherSettingsActivity extends ToolsActivityBase {
                     changed();
                     refresh();
                 })
-                .setNegativeButton(android.R.string.cancel, null)
+                .setNegativeButton(R.string.action_cancel, null)
                 .show();
     }
 
@@ -253,7 +253,7 @@ public final class LauncherSettingsActivity extends ToolsActivityBase {
                     }
                     refresh();
                 })
-                .setNegativeButton(android.R.string.cancel, null)
+                .setNegativeButton(R.string.action_cancel, null)
                 .show();
     }
 

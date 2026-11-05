@@ -45,7 +45,7 @@ public final class LauncherToolsActivity extends ToolsActivityBase {
         row(rows, getString(R.string.idle_title), this::idleClock);
         row(rows, getString(R.string.history_title), this::history);
         row(rows, getString(R.string.help_title), () -> new LauncherDialogBuilder(this).setTitle(R.string.help_title)
-                .setMessage(R.string.help_body).setPositiveButton(android.R.string.ok, null).show());
+                .setMessage(R.string.help_body).setPositiveButton(R.string.action_ok, null).show());
         row(rows, "Установить APK с флешки", this::pickApk);
         row(rows, "Удалить приложение…", this::chooseUninstall);
         row(rows, "Форма плиток", this::chooseShape);
@@ -89,7 +89,7 @@ public final class LauncherToolsActivity extends ToolsActivityBase {
                 .setSingleChoiceItems(getResources().getStringArray(R.array.performance_choices), selected, (d, which) -> {
                     p.edit().putBoolean("animations", which > 0).putBoolean("advanced_effects", which == 2).apply();
                     PremiumPreferences.changed(this); d.dismiss(); status.setText(R.string.performance_saved);
-                }).setNegativeButton(android.R.string.cancel, null).show();
+                }).setNegativeButton(R.string.action_cancel, null).show();
     }
     private void idleClock() {
         int[] minutes = {0, 2, 5, 10, 15, 30};
@@ -102,7 +102,7 @@ public final class LauncherToolsActivity extends ToolsActivityBase {
         new LauncherDialogBuilder(this).setTitle(R.string.idle_title).setSingleChoiceItems(labels, selected, (d, which) -> {
             getSharedPreferences(Config.SETTINGS_NAME, MODE_PRIVATE).edit().putInt("home_idle_clock_minutes", minutes[which]).apply();
             PremiumPreferences.changed(this); d.dismiss(); status.setText(R.string.idle_saved);
-        }).setNegativeButton(android.R.string.cancel, null).show();
+        }).setNegativeButton(R.string.action_cancel, null).show();
     }
     private void history() {
         android.content.SharedPreferences p = PremiumPreferences.get(this);
@@ -115,8 +115,8 @@ public final class LauncherToolsActivity extends ToolsActivityBase {
                     } else new LauncherDialogBuilder(this).setTitle(R.string.history_clear)
                             .setMessage(R.string.history_clear_confirm).setPositiveButton(R.string.history_clear, (dialog, button) -> {
                                 LastOpened.clear(this); status.setText(R.string.history_cleared);
-                            }).setNegativeButton(android.R.string.cancel, null).show();
-                }).setNegativeButton(android.R.string.cancel, null).show();
+                            }).setNegativeButton(R.string.action_cancel, null).show();
+                }).setNegativeButton(R.string.action_cancel, null).show();
     }
     private interface Work { void run(ToolNetwork net) throws Exception; }
     private synchronized void cancel() {

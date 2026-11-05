@@ -195,6 +195,6 @@ final class VisualDashboard {
         new LauncherDialogBuilder(activity).setTitle(R.string.visual_timer).setItems(labels, (d, which) -> {
             if (which == 4) SESSION.stop(); else SESSION.start(SystemClock.elapsedRealtime(), durations[which]); refreshTimer();
             Toast.makeText(activity, R.string.visual_timer_note, Toast.LENGTH_LONG).show();
-        }).setNegativeButton(android.R.string.cancel, null).show();
+        }).setNegativeButton(R.string.action_cancel, null).show();
     }
 }
