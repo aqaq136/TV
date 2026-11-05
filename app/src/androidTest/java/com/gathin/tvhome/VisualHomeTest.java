@@ -60,6 +60,7 @@ public class VisualHomeTest {
             assertEquals("Все приложения", home.getString(R.string.visual_all));
             assertEquals("Источники", home.getString(R.string.inputs));
             assertEquals("Отмена", home.getString(R.string.action_cancel));
+            assertEquals("5 минут назад", LastOpened.describe(home, System.currentTimeMillis() - 300_000));
             assertEquals("Системная трассировка", AppLabels.knownTitle("com.android.traceur"));
             View hero = home.findViewById(R.id.visualHeroPanel), grid = home.findViewById(R.id.grid), bar = home.findViewById(R.id.visualQuickBar);
             assertTrue(hero.getHeight() > 0); assertTrue(grid.getHeight() >= 80 * home.getResources().getDisplayMetrics().density);
