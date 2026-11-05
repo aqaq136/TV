@@ -22,7 +22,7 @@ import static org.junit.Assert.*;
 public class VisualHomeTest {
     private final Instrumentation instrumentation = InstrumentationRegistry.getInstrumentation();
     @Before public void resetVisualPreferences() {
-        android.content.Context context = instrumentation.getTargetContext(); VisualPreferences.migrate(context);
+        android.content.Context context = instrumentation.getTargetContext(); VisualPreferences.migrate(context); WeatherStore.useFreeSources(context);
         PremiumPreferences.get(context).edit().remove("weather_city").remove("latitude").remove("longitude").remove("weather_hidden").apply();
         WeatherStore.clearCache(context); WeatherStore.credentials(context).edit().clear().apply();
         PremiumPreferences.get(context).edit().putString("visual_palette", "cosmos").putString("visual_scene", "aurora")
@@ -102,36 +102,55 @@ public class VisualHomeTest {
         prefs.edit().putString("visual_palette", "cosmos").putString("visual_scene", "aurora").putInt("visual_quality", 2).apply();
         instrumentation.runOnMainSync(home::finish); instrumentation.waitForIdleSync();
     }
-    @Test public void weatherSetupAndCachedYandexSourceAreReadableWithRemote() throws Exception {
+    @Test public void weatherWithoutKeysAndCachedSourceAreReadableWithRemote() throws Exception {
         android.content.Context context = instrumentation.getTargetContext();
         Activity weather = start(WeatherActivity.class);
         instrumentation.runOnMainSync(() -> {
-            assertTrue(((android.widget.TextView)weather.findViewById(R.id.weatherSource)).getText().toString().contains("Яндекс API не подключён"));
+            assertTrue(((android.widget.TextView)weather.findViewById(R.id.weatherSource)).getText().toString().contains("Без ключей"));
             assertEquals("Выбрать город →", ((android.widget.TextView)weather.findViewById(R.id.weatherStatus)).getText().toString());
             assertTrue(weather.findViewById(R.id.weatherUpdate).hasFocus());
         });
-        SystemClock.sleep(650); screenshot("weather-setup");
+        SystemClock.sleep(650); screenshot("weather-free-setup");
         instrumentation.sendKeyDownUpSync(KeyEvent.KEYCODE_DPAD_DOWN); instrumentation.waitForIdleSync();
         instrumentation.runOnMainSync(() -> { assertEquals(R.id.weatherCity, weather.getCurrentFocus().getId()); weather.finish(); });
         instrumentation.waitForIdleSync();
         // Explicit cached test fixture; no real API access or fabricated live weather is claimed.
         WeatherStore.select(context, new WeatherData.City("Тестовый город", 55.75, 37.62));
-        WeatherStore.credentials(context).edit().putString("yandex_key", "test-key-not-a-real-credential").putBoolean("yandex_enabled", true).apply();
         PremiumPreferences.get(context).edit().putString("weather_summary", "+20 °C · Пасмурно · ветер 2 м/с")
-                .putString("weather_source", "Яндекс Погода").putLong("weather_time", System.currentTimeMillis()).apply();
+                .putString("weather_source", "MET Norway").putLong("weather_time", System.currentTimeMillis()).apply();
         Activity cached = start(WeatherActivity.class);
         instrumentation.runOnMainSync(() -> {
             String text = ((android.widget.TextView)cached.findViewById(R.id.weatherStatus)).getText().toString();
             assertTrue(text.contains("Тестовый город"));
-            assertTrue(((android.widget.TextView)cached.findViewById(R.id.weatherSource)).getText().toString().contains("Яндекс Погода"));
+            assertTrue(((android.widget.TextView)cached.findViewById(R.id.weatherSource)).getText().toString().contains("MET Norway"));
             assertTrue(text.contains("+20 °C"));
         });
-        SystemClock.sleep(650); screenshot("weather-cached-fixture");
+        SystemClock.sleep(650); screenshot("weather-free-cached-fixture");
         instrumentation.runOnMainSync(cached::finish); instrumentation.waitForIdleSync();
         Activity home = start(MainActivity.class);
-        instrumentation.runOnMainSync(() -> assertTrue(((android.widget.TextView)home.findViewById(R.id.premiumSubtitle)).getText().toString().contains("Яндекс Погода")));
+        instrumentation.runOnMainSync(() -> assertTrue(((android.widget.TextView)home.findViewById(R.id.premiumSubtitle)).getText().toString().contains("MET Norway")));
         instrumentation.runOnMainSync(home::finish); instrumentation.waitForIdleSync();
         PremiumPreferences.get(context).edit().remove("latitude").remove("longitude").remove("weather_city").apply();
         WeatherStore.clearCache(context); WeatherStore.credentials(context).edit().clear().apply();
     }
+    @Test public void memoryCleanupReportsRealMeasurementsAndHomeRebuilds() throws Exception {
+        android.content.Context context = instrumentation.getTargetContext();
+        PremiumPreferences.get(context).edit().putString("favorites", "com.lego.android.tvleanback").apply();
+        Activity home = start(MainActivity.class); SystemClock.sleep(700);
+        Activity memory = start(MemoryActivity.class); SystemClock.sleep(2300);
+        instrumentation.runOnMainSync(() -> {
+            String result = ((android.widget.TextView)memory.findViewById(R.id.memoryStatus)).getText().toString();
+            assertTrue(result.contains("Кэш лаунчера освобождён.")); assertTrue(result.contains("Свободно до:")); assertTrue(result.contains("после:"));
+            assertTrue(result.contains("Изменение свободной ОЗУ:"));
+            assertEquals("com.lego.android.tvleanback", PremiumPreferences.get(context).getString("favorites", ""));
+        });
+        screenshot("memory-cleanup");
+        instrumentation.runOnMainSync(memory::finish); instrumentation.waitForIdleSync(); SystemClock.sleep(1200);
+        instrumentation.runOnMainSync(() -> {
+            RecyclerView grid = home.findViewById(R.id.grid); assertNotNull(grid.getAdapter()); assertTrue(grid.getAdapter().getItemCount() > 0);
+            assertTrue(home.findViewById(R.id.visualQuickBar).getHeight() > 0);
+            home.finish();
+        }); instrumentation.waitForIdleSync();
+    }
+
 }

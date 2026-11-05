@@ -22,6 +22,7 @@ final class WeatherController {
     WeatherController(Context context, Runnable changed) { this(context, changed, ToolNetwork::new); }
     WeatherController(Context context, Runnable changed, java.util.function.Supplier<ToolNetwork> connections) {
         this.context = context.getApplicationContext(); this.changed = changed; this.connections = connections;
+        WeatherStore.useFreeSources(this.context);
     }
     void resume() { if (closed) return; active = true; main.removeCallbacks(poll); main.post(poll); }
     void pause() {
@@ -36,25 +37,27 @@ final class WeatherController {
         WeatherData.City city = WeatherStore.city(context);
         if (city == null || p.getBoolean("weather_hidden", false)) { changed.run(); return; }
         long now = System.currentTimeMillis();
+        long received = p.getLong("weather_time", 0);
+        if (received > 0 && now >= received && now < p.getLong("weather_next_refresh", 0) && !p.getString("weather_summary", "").isEmpty()) { changed.run(); return; }
         if (!force && !WeatherPolicy.due(now, p.getLong("weather_time", 0), p.getLong("weather_attempt", 0), !p.getString("weather_error", "").isEmpty())) return;
-        String identity = WeatherStore.identity(context), key = WeatherStore.key(context);
-        boolean yandex = WeatherStore.yandex(context), informer = WeatherStore.credentials(context).getBoolean("informer", false);
+        String identity = WeatherStore.identity(context);
         ToolNetwork request = connections.get(); network = request;
         changed.run();
         worker.execute(() -> {
-            String summary = null, error = null;
-            try { summary = yandex ? WeatherData.yandex(request.yandex(city, key, informer)) : WeatherData.current(request.json(WeatherPolicy.openMeteoUrl(city))); }
-            catch (Exception e) { error = WeatherPolicy.failure(e, yandex); }
+            FreeWeather.Reading reading = null; String error = null;
+            try { reading = FreeWeather.load(request, city, System.currentTimeMillis()); }
+            catch (Exception e) { error = "Не удалось получить погоду от основного и запасного источников. " + WeatherPolicy.failure(e, false); }
             finally { request.close(); }
-            String value = summary, failure = error;
+            FreeWeather.Reading value = reading; String failure = error;
             main.post(() -> {
                 if (network != request) return;
                 network = null;
                 if (!active || closed) return;
                 if (identity.equals(WeatherStore.identity(context))) {
                     SharedPreferences.Editor edit = p.edit().putLong("weather_attempt", System.currentTimeMillis());
-                    if (value != null) edit.putString("weather_summary", value).putLong("weather_time", System.currentTimeMillis())
-                            .putString("weather_source", yandex ? "Яндекс Погода" : "Open-Meteo").remove("weather_error");
+                    if (value != null) edit.putString("weather_summary", value.summary).putLong("weather_time", System.currentTimeMillis())
+                            .putString("weather_source", value.source).putLong("weather_forecast_time", value.forecastTime)
+                            .putLong("weather_next_refresh", value.expires).remove("weather_error");
                     else edit.putString("weather_error", failure);
                     edit.apply();
                 }

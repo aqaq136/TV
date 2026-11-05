@@ -437,6 +437,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
 
     private void setupErokhinPremium() {
         premiumHome = new PremiumHome(this, () -> focusTile(lastFocused));
+        MemoryCleaner.register(this);
     }
 
     @Override
@@ -1335,6 +1336,12 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
      * rebuild it when Home comes back. Not at UI_HIDDEN, the ordinary trip to an app, where keeping the
      * tiles is what makes the return instant.
      */
+    boolean releaseUserCaches() {
+        if (started || adapter == null || grid == null) return false;
+        onTrimMemory(android.content.ComponentCallbacks2.TRIM_MEMORY_BACKGROUND);
+        return true;
+    }
+
     @Override
     public void onTrimMemory(int level) {
         super.onTrimMemory(level);

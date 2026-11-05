@@ -31,26 +31,22 @@ public final class WeatherActivity extends ToolsActivityBase {
         source = text(rows, "", 16, 0xFF7DE3FF); source.setId(R.id.weatherSource);
         status = text(rows, "", 22, Color.WHITE); status.setId(R.id.weatherStatus);
         status.setMinHeight(dp(86));
-        text(rows, "Обновление каждые 30 минут, пока лаунчер открыт. При сбое сохраняется последняя сводка с отметкой времени.", 14, 0xFFB9CBE5);
+        text(rows, "Обновление автоматически, пока лаунчер открыт. При сбое сохраняется последняя сводка с отметкой времени.", 14, 0xFFB9CBE5);
         LinearLayout pair = new LinearLayout(this); rows.addView(pair);
         LinearLayout left = column(pair), right = column(pair);
         refresh = button(left, "Обновить сейчас", () -> {
             PremiumPreferences.get(this).edit().putBoolean("weather_hidden", false).apply(); weather.refresh(true);
         }); refresh.setId(R.id.weatherUpdate);
         button(left, "Выбрать город", this::chooseCity).setId(R.id.weatherCity);
-        button(left, "Открыть Яндекс Погоду", () -> open(WeatherStore.city(this) == null ? "https://yandex.ru/pogoda/" : WeatherPolicy.yandexPage(WeatherStore.city(this))));
-        button(right, "Источник погоды", this::chooseSource);
-        button(right, "Подключить ключ Яндекс.Погоды", this::keyDialog);
+        button(left, "Погода на сайте MET Norway", () -> open("https://www.met.no/en"));
         button(right, "Скрыть / показать виджет погоды", () -> {
             boolean hidden = PremiumPreferences.get(this).getBoolean("weather_hidden", false);
             PremiumPreferences.get(this).edit().putBoolean("weather_hidden", !hidden).apply(); restart();
         });
-        text(rows, "Для данных Яндекса нужен личный ключ API погодных данных (REST). Ключ вводится здесь, хранится только на телевизоре и не включается в резервные копии. Без подключения Яндекса используется Open-Meteo.", 14, 0xFFB9CBE5);
-        button(rows, "Кабинет разработчика Яндекс.Погоды", () -> open("https://yandex.ru/pogoda/b2b/console"));
-        button(rows, "Удалить сохранённый ключ Яндекса", () -> new LauncherDialogBuilder(this).setTitle("Удалить ключ?")
-                .setMessage("Виджет переключится на Open-Meteo. Город сохранится.")
-                .setPositiveButton("Удалить", (d, w) -> { WeatherStore.credentials(this).edit().clear().apply(); WeatherStore.clearCache(this); restart(); })
-                .setNegativeButton(R.string.action_cancel, null).show());
+        button(right, "Изменить город", this::chooseCity);
+        text(rows, "Погода работает без регистрации и ключей. Источники: MET Norway и Open-Meteo. При недоступности одного автоматически используется другой. Нужен доступ в интернет.", 15, 0xFFB9CBE5);
+        text(rows, "MET Norway: прогноз на ближайший час. Данные MET Norway и Open-Meteo — CC BY 4.0. Источник и время получения указаны в сводке.", 14, 0xFFB9CBE5);
+        button(rows, "Источник Open-Meteo", () -> open("https://open-meteo.com/"));
         weather = new WeatherController(this, this::render);
         render(); refresh.requestFocus();
         if (state == null && getIntent().getBooleanExtra("choose_city", false)) scroll.post(this::chooseCity);
@@ -71,7 +67,7 @@ public final class WeatherActivity extends ToolsActivityBase {
         v.setOnClickListener(view -> action.run()); return v;
     }
     private void render() {
-        source.setText("Источник: " + (WeatherStore.yandex(this) ? "Яндекс Погода" : "Open-Meteo · Яндекс API не подключён или не выбран"));
+        source.setText("Без ключей · " + PremiumPreferences.get(this).getString("weather_source", "автоматический выбор источника"));
         status.setText(WeatherStore.summary(this, true));
         refresh.setText(weather != null && weather.loading() ? "Загрузка погоды…" : "Обновить сейчас");
     }
@@ -80,31 +76,8 @@ public final class WeatherActivity extends ToolsActivityBase {
         try { startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url))); }
         catch (ActivityNotFoundException | SecurityException e) { status.setText("Для открытия страницы нужен браузер на телевизоре."); }
     }
-    private void chooseSource() {
-        new LauncherDialogBuilder(this).setTitle("Источник погоды")
-                .setItems(new String[]{"Open-Meteo — без ключа", "Яндекс Погода — REST API", "Яндекс Погода — архивный тариф информера"}, (d, which) -> {
-                    if (which == 0) { WeatherStore.credentials(this).edit().putBoolean("yandex_enabled", false).apply(); WeatherStore.clearCache(this); restart(); return; }
-                    WeatherStore.credentials(this).edit().putBoolean("informer", which == 2).apply();
-                    if (WeatherStore.key(this).isEmpty()) { keyDialog(); return; }
-                    WeatherStore.credentials(this).edit().putBoolean("yandex_enabled", true).apply(); WeatherStore.clearCache(this); restart();
-                }).setNegativeButton(R.string.action_cancel, null).show();
-    }
     private EditText input(String hint) {
         EditText field = new EditText(this); field.setSingleLine(true); field.setHint(hint); field.setTextColor(Color.WHITE); field.setHintTextColor(0xFFB9CBE5); return field;
-    }
-    private void keyDialog() {
-        EditText field = input("Ключ API погодных данных");
-        field.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
-        field.setImportantForAutofill(android.view.View.IMPORTANT_FOR_AUTOFILL_NO_EXCLUDE_DESCENDANTS);
-        field.setSaveEnabled(false);
-        new LauncherDialogBuilder(this).setTitle("Подключить Яндекс Погоду")
-                .setMessage("Введите свой ключ с доступом к REST API. После сохранения начнётся проверка подключения. Тариф и лимиты задаются в кабинете Яндекса.")
-                .setView(field).setPositiveButton("Подключить", (d, w) -> {
-                    String key = field.getText().toString().trim(); field.setText("");
-                    if (!WeatherPolicy.validKey(key)) { status.setText("Ключ не сохранён: проверьте, что скопировали его полностью, без пробелов."); return; }
-                    WeatherStore.credentials(this).edit().putString("yandex_key", key).putBoolean("yandex_enabled", true).apply();
-                    WeatherStore.clearCache(this); restart();
-                }).setNegativeButton(R.string.action_cancel, (d, w) -> field.setText("")).show();
     }
     private void chooseCity() {
         new LauncherDialogBuilder(this).setTitle("Выбрать город")

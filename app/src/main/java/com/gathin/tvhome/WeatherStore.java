@@ -5,6 +5,13 @@ import android.content.SharedPreferences;
 
 /** Credentials are local, separate from the exported preferences allowlist. */
 final class WeatherStore {
+    static void useFreeSources(Context c) {
+        SharedPreferences p = PremiumPreferences.get(c);
+        if (!p.getBoolean("weather_free_sources_v1", false)) {
+            credentials(c).edit().clear().apply(); clearCache(c);
+            p.edit().putBoolean("weather_free_sources_v1", true).apply();
+        }
+    }
     static SharedPreferences credentials(Context c) { return c.getSharedPreferences("weather_credentials", Context.MODE_PRIVATE); }
     static String key(Context c) { return credentials(c).getString("yandex_key", ""); }
     static boolean yandex(Context c) { return credentials(c).getBoolean("yandex_enabled", !key(c).isEmpty()) && !key(c).isEmpty(); }
@@ -15,12 +22,11 @@ final class WeatherStore {
     }
     static String identity(Context c) {
         SharedPreferences p = PremiumPreferences.get(c);
-        return p.getString("latitude", "") + ":" + p.getString("longitude", "") + ":" + p.getBoolean("weather_hidden", false)
-                + ":" + credentials(c).getBoolean("informer", false) + ":" + yandex(c) + ":" + key(c);
+        return p.getString("latitude", "") + ":" + p.getString("longitude", "") + ":" + p.getBoolean("weather_hidden", false);
     }
     static void clearCache(Context c) {
         PremiumPreferences.get(c).edit().remove("weather_summary").remove("weather_time").remove("weather_source")
-                .remove("weather_attempt").remove("weather_error").apply();
+                .remove("weather_attempt").remove("weather_error").remove("weather_next_refresh").remove("weather_forecast_time").apply();
     }
     static void select(Context c, WeatherData.City city) {
         PremiumPreferences.get(c).edit().putString("weather_city", city.title).putString("latitude", Double.toString(city.latitude))
@@ -39,7 +45,9 @@ final class WeatherStore {
         String age = WeatherPolicy.stale(System.currentTimeMillis(), time) ? "Устарело · " : "";
         String saved = android.text.format.DateFormat.format("dd.MM HH:mm", time).toString();
         if (!detail) return city + " · " + weather.split(" · ")[0] + "\n" + source + " · " + age + saved + (error.isEmpty() ? "" : " · сбой");
+        long forecast = p.getLong("weather_forecast_time", 0);
         return city + " · " + weather + "\nПолучено: " + age + saved
+                + (forecast == 0 ? "" : " · прогноз на " + android.text.format.DateFormat.format("HH:mm", forecast))
                 + (error.isEmpty() ? "" : detail ? "\n" + error : " · ошибка обновления");
     }
 }

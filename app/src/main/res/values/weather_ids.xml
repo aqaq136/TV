@@ -3,4 +3,6 @@
     <item type="id" name="weatherStatus" />
     <item type="id" name="weatherUpdate" />
     <item type="id" name="weatherCity" />
+    <item type="id" name="memoryStatus" />
+    <item type="id" name="memoryClean" />
 </resources>

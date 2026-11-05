@@ -17,6 +17,9 @@ final class ToolNetwork implements AutoCloseable {
     }
     private volatile HttpsURLConnection active;
     private volatile boolean closed;
+    private long expires;
+    boolean isClosed() { return closed || Thread.currentThread().isInterrupted(); }
+    long expires() { return expires; }
     private HttpsURLConnection connect(String address) throws Exception {
         if (closed || Thread.currentThread().isInterrupted()) throw new java.io.InterruptedIOException();
         URL url = new URL(address);
@@ -27,7 +30,9 @@ final class ToolNetwork implements AutoCloseable {
         c.setConnectTimeout(8000); c.setReadTimeout(8000); c.setUseCaches(false);
         c.setInstanceFollowRedirects(false);
         c.setRequestProperty("Accept-Encoding", "identity");
-        c.setRequestProperty("User-Agent", "MetoxTV/4.0.2");
+        c.setRequestProperty("User-Agent", "MetoxTV/4.0.3 (https://github.com/aqaq136/TV)");
+        c.setRequestProperty("Accept", "application/json");
+        expires = 0;
         return c;
     }
     String json(String address) throws Exception {
@@ -43,6 +48,7 @@ final class ToolNetwork implements AutoCloseable {
     private String json(HttpsURLConnection c) throws Exception {
         try {
             if (c.getResponseCode() != 200) throw new HttpException(c.getResponseCode());
+            expires = c.getHeaderFieldDate("Expires", 0);
             ByteArrayOutputStream bytes = new ByteArrayOutputStream();
             try (InputStream stream = c.getInputStream()) {
                 byte[] buffer = new byte[8192]; int n;
