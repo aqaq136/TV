@@ -72,7 +72,7 @@ jobs:
           PREVIEW_BRANCH: codex/tv-preview-${{ github.run_id }}
         run: |
           mkdir -p docs/screenshots
-          cp work/rendered/*.png docs/screenshots/
+          cp work/rendered/* docs/screenshots/
           git switch -c "$PREVIEW_BRANCH"
           git add docs/screenshots
           git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m 'Capture actual Android TV 9 visual previews'

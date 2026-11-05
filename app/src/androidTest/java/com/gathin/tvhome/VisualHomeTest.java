@@ -51,6 +51,8 @@ public class VisualHomeTest {
         Activity home = start(MainActivity.class);
         SystemClock.sleep(1800);
         screenshot("home-4.0");
+        shell("mkdir -p /sdcard/Download/MetoxTV-preview");
+        shell("screenrecord --size 1280x720 --bit-rate 1500000 --time-limit 6 /sdcard/Download/MetoxTV-preview/home-effects.mp4");
         instrumentation.runOnMainSync(() -> {
             AtmosphereView atmosphere = home.findViewById(R.id.visualAtmosphere);
             assertNotNull(atmosphere); assertTrue(atmosphere.isRendering());

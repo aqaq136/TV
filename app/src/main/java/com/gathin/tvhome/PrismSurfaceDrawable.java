@@ -19,12 +19,15 @@ final class PrismSurfaceDrawable extends Drawable {
     private final String style;
     private Shader fill, sheen;
     private boolean focused;
+    private int surfaceAlpha = 255;
     PrismSurfaceDrawable(int accent, float density, float radius, String style) {
         this.accent = accent; this.density = density; this.radius = radius; this.style = style;
     }
     @Override protected void onBoundsChange(Rect b) {
         int tint = "solid".equals(style) ? 0xFF192338 : VisualPalette.blend(0xFF0D1427, accent, .18f);
-        fill = new LinearGradient(b.left, b.top, b.right, b.bottom, new int[]{VisualPalette.blend(tint, accent, .19f), tint, 0xED0C1120}, null, Shader.TileMode.CLAMP);
+        int[] colors = "panel".equals(style) ? new int[]{VisualPalette.alpha(VisualPalette.blend(tint, accent, .15f), 75), VisualPalette.alpha(tint, 50), 0x40070B1B}
+                : new int[]{VisualPalette.blend(tint, accent, .19f), tint, 0xED0C1120};
+        fill = new LinearGradient(b.left, b.top, b.right, b.bottom, colors, null, Shader.TileMode.CLAMP);
         sheen = new LinearGradient(b.left, b.top, b.right, b.bottom, new int[]{0x2AFFFFFF, 0x02FFFFFF, 0x00FFFFFF}, new float[]{0,.5f,1}, Shader.TileMode.CLAMP);
     }
     @Override public boolean isStateful() { return true; }
@@ -36,16 +39,16 @@ final class PrismSurfaceDrawable extends Drawable {
     @Override public void draw(Canvas c) {
         Rect b = getBounds(); float inset = density;
         rect.set(b.left + inset, b.top + inset, b.right - inset, b.bottom - inset);
-        paint.setStyle(Paint.Style.FILL); paint.setShader(fill); c.drawRoundRect(rect, radius, radius, paint);
+        paint.setStyle(Paint.Style.FILL); paint.setAlpha(surfaceAlpha); paint.setShader(fill); c.drawRoundRect(rect, radius, radius, paint);
         if (!"solid".equals(style)) { paint.setShader(sheen); c.drawRoundRect(rect, radius, radius, paint); }
         paint.setShader(null); paint.setStyle(Paint.Style.STROKE);
         paint.setStrokeWidth((focused ? 1.6f : 1f) * density);
-        paint.setColor(VisualPalette.alpha(accent, focused ? 235 : "neon".equals(style) ? 150 : 65));
+        paint.setColor(VisualPalette.alpha(accent, (focused ? 235 : "neon".equals(style) ? 150 : 65) * surfaceAlpha / 255));
         c.drawRoundRect(rect, radius, radius, paint);
-        paint.setStyle(Paint.Style.FILL); paint.setColor(VisualPalette.alpha(accent, focused ? 210 : 105));
+        paint.setStyle(Paint.Style.FILL); paint.setColor(VisualPalette.alpha(accent, (focused ? 210 : 105) * surfaceAlpha / 255));
         c.drawRoundRect(rect.left + radius, rect.top, rect.left + radius + rect.width() * .19f, rect.top + 2 * density, density, density, paint);
     }
-    @Override public void setAlpha(int alpha) {}
-    @Override public void setColorFilter(ColorFilter filter) {}
+    @Override public void setAlpha(int alpha) { surfaceAlpha = Math.max(0, Math.min(255, alpha)); invalidateSelf(); }
+    @Override public void setColorFilter(ColorFilter filter) { paint.setColorFilter(filter); invalidateSelf(); }
     @Override public int getOpacity() { return PixelFormat.TRANSLUCENT; }
 }

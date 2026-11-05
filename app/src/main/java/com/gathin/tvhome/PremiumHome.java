@@ -42,6 +42,10 @@ final class PremiumHome {
         int[] ids = {R.id.erokhinStorage, R.id.erokhinMemory, R.id.erokhinStartup, R.id.erokhinSystem};
         for (int i = 0; i < ids.length; i++) {
             View v = activity.findViewById(ids[i]);
+            TextView utility = (TextView) v;
+            Drawable[] marks = utility.getCompoundDrawablesRelative();
+            for (Drawable mark : marks) if (mark != null) mark.setBounds(0, 0, dp(18), dp(18));
+            utility.setCompoundDrawablesRelative(marks[0], marks[1], marks[2], marks[3]);
             v.setBackground(new PrismSurfaceDrawable(VisualPalette.of(PremiumPreferences.get(activity).getString("visual_palette", "cosmos")).primary,
                     density, dp(10), "glass"));
             v.setNextFocusLeftId(ids[Math.max(0, i - 1)]);

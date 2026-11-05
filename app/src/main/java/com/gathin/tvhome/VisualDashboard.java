@@ -115,6 +115,11 @@ final class VisualDashboard {
         widgets.setVisibility(p.getBoolean("visual_widgets", true) ? View.VISIBLE : View.GONE);
         continueButton.setBackground(new PrismSurfaceDrawable(palette.primary, activity.getResources().getDisplayMetrics().density, dp(10), "neon"));
         continueButton.setTextColor(Color.WHITE);
+        View appPanel = activity.findViewById(R.id.premiumAppsPanel);
+        if (appPanel != null) {
+            PrismSurfaceDrawable panel = new PrismSurfaceDrawable(palette.primary, activity.getResources().getDisplayMetrics().density, dp(20), "panel");
+            panel.setAlpha(Math.round(Config.load(activity).dockOpacity * 2.55f)); appPanel.setBackground(panel);
+        }
     }
     void resume() {
         active = true; if (atmosphere != null) { atmosphere.setActive(true); refreshRecent(); }
