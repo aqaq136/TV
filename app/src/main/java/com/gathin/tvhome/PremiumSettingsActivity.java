@@ -40,6 +40,7 @@ public final class PremiumSettingsActivity extends ToolsActivityBase {
         rows.setPadding(dp(48), dp(24), dp(48), dp(24));
         scroll.addView(rows); setContentView(scroll);
         title("MetoxTV · Персонализация", 28);
+        row(getString(R.string.visual_studio), () -> startActivity(new Intent(this, VisualSettingsActivity.class)));
         title("Изменения сохраняются автоматически. Вернитесь кнопкой «Назад».", 14);
         row("Инструменты: APK, погода, сеть, звуки", () -> startActivity(new Intent(this, LauncherToolsActivity.class)));
         row("Избранное — выбрать приложения", this::editFavorites);

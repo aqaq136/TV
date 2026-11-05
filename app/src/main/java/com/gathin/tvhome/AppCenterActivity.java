@@ -53,16 +53,20 @@ public final class AppCenterActivity extends ToolsActivityBase {
     private int mode;
     private boolean ready;
     private String focusedPackage;
+    private int category;
+    private TextView categoryButton;
 
     private static final class Entry {
         final String pkg, label;
         final boolean tv;
-        Entry(String pkg, String label, boolean tv) { this.pkg = pkg; this.label = label; this.tv = tv; }
+        final int platformCategory;
+        Entry(String pkg, String label, boolean tv, int platformCategory) { this.pkg = pkg; this.label = label; this.tv = tv; this.platformCategory = platformCategory; }
     }
 
     @Override protected void onCreate(Bundle state) {
         super.onCreate(state);
-        mode = state == null ? 0 : state.getInt("mode", 0);
+        mode = Math.max(0, Math.min(2, state == null ? getIntent().getIntExtra("mode", 0) : state.getInt("mode", 0)));
+        category = state == null ? 0 : state.getInt("category", 0);
         LinearLayout root = new LinearLayout(this);
         root.setOrientation(LinearLayout.VERTICAL); root.setPadding(dp(36), dp(18), dp(36), dp(18));
         root.setBackgroundColor(0xFF080F25); setContentView(root);
@@ -84,6 +88,11 @@ public final class AppCenterActivity extends ToolsActivityBase {
             tabs.addView(tab, lp);
             tab.setOnClickListener(v -> { mode = value; filter(); });
         }
+        categoryButton = text("", 15); categoryButton.setFocusable(true); categoryButton.setClickable(true);
+        categoryButton.setBackgroundResource(R.drawable.visual_control); root.addView(categoryButton);
+        categoryButton.setOnClickListener(v -> new LauncherDialogBuilder(this).setTitle(R.string.category_title)
+                .setSingleChoiceItems(getResources().getStringArray(R.array.category_choices), category, (d, which) -> { category = which; filter(); d.dismiss(); })
+                .setNegativeButton(android.R.string.cancel, null).show());
         summary = text(getString(R.string.center_loading), 14); root.addView(summary);
         list = new RecyclerView(this); list.setLayoutManager(new LinearLayoutManager(this));
         list.setItemAnimator(null); list.setAdapter(adapter); list.setClipToPadding(false);
@@ -111,7 +120,7 @@ public final class AppCenterActivity extends ToolsActivityBase {
                         if (info.activityInfo == null || !info.activityInfo.enabled || !info.activityInfo.exported) continue;
                         String pkg = info.activityInfo.packageName;
                         if (!pkg.equals(getPackageName()) && !entries.containsKey(pkg)) {
-                            entries.put(pkg, new Entry(pkg, info.loadLabel(pm).toString(), category.equals(Intent.CATEGORY_LEANBACK_LAUNCHER)));
+                            entries.put(pkg, new Entry(pkg, info.loadLabel(pm).toString(), category.equals(Intent.CATEGORY_LEANBACK_LAUNCHER), info.activityInfo.applicationInfo.category));
                         }
                     }
                 }
@@ -129,6 +138,7 @@ public final class AppCenterActivity extends ToolsActivityBase {
     private int dp(int x) { return Math.round(x * getResources().getDisplayMetrics().density); }
 
     private void filter() {
+        categoryButton.setText(getString(R.string.category_button, getResources().getStringArray(R.array.category_choices)[Math.max(0, Math.min(4, category))]));
         for (int i = 0; i < filters.length; i++) {
             filters[i].setTextColor(i == mode ? 0xFF76DAFF : Color.WHITE);
             filters[i].setContentDescription(filters[i].getText() + (i == mode ? getString(R.string.center_selected) : ""));
@@ -138,10 +148,14 @@ public final class AppCenterActivity extends ToolsActivityBase {
         List<String> favorites = PremiumPreferences.favorites(this);
         Map<String, Long> recent = new LinkedHashMap<>();
         Map<String, Integer> ranks = new LinkedHashMap<>();
+        Map<String, Integer> assigned;
+        try { assigned = AppCategories.parse(PremiumPreferences.get(this).getString("app_categories", "")); }
+        catch (IllegalArgumentException e) { assigned = new LinkedHashMap<>(); }
         List<Entry> before = new ArrayList<>(visible);
         Map<String, String> previousStates = new LinkedHashMap<>(rowStates);
         visible.clear();
         for (Entry e : all) {
+            if (category > 0 && AppCategories.resolve(e.pkg, e.platformCategory, assigned) != category) continue;
             long time = LastOpened.get(this, e.pkg); recent.put(e.pkg, time);
             if (mode == 1 && !favorites.contains(e.pkg) || mode == 2 && time <= 0) continue;
             int rank = AppSearch.rank(e.label, e.pkg, input);
@@ -201,7 +215,8 @@ public final class AppCenterActivity extends ToolsActivityBase {
                 LibraryApps.load(this).contains(e.pkg) || cfg.libraryApps.contains(e.pkg), LibraryApps.loadRemoved(this).contains(e.pkg));
         new LauncherDialogBuilder(this).setTitle(e.label).setItems(new String[]{getString(R.string.center_open),
                 getString(favorite ? R.string.premium_remove_favorite : R.string.premium_add_favorite),
-                getString(home ? R.string.library_remove_shortcut : R.string.center_add_home), getString(R.string.library_app_info)}, (d, which) -> {
+                getString(home ? R.string.library_remove_shortcut : R.string.center_add_home), getString(R.string.library_app_info), getString(R.string.category_assign)}, (d, which) -> {
+            if (which == 4) assignCategory(e);
             if (which == 0) launch(e);
             if (which == 1) {
                 if (!PremiumPreferences.toggleFavorite(this, e.pkg)) Toast.makeText(this, R.string.center_favorites_full, Toast.LENGTH_LONG).show();
@@ -222,7 +237,19 @@ public final class AppCenterActivity extends ToolsActivityBase {
 
     @Override protected void onResume() { super.onResume(); if (ready) filter(); }
     @Override protected void onSaveInstanceState(Bundle state) {
-        super.onSaveInstanceState(state); state.putInt("mode", mode); state.putString("query", query.getText().toString());
+        super.onSaveInstanceState(state); state.putInt("mode", mode); state.putInt("category", category); state.putString("query", query.getText().toString());
+    }
+    private void assignCategory(Entry e) {
+        String[] labels = getResources().getStringArray(R.array.category_choices); labels[0] = getString(R.string.category_automatic);
+        Map<String, Integer> selected;
+        try { selected = AppCategories.parse(PremiumPreferences.get(this).getString("app_categories", "")); }
+        catch (IllegalArgumentException ex) { selected = new LinkedHashMap<>(); }
+        Map<String, Integer> owner = selected;
+        new LauncherDialogBuilder(this).setTitle(e.label).setSingleChoiceItems(labels, owner.getOrDefault(e.pkg, 0), (d, which) -> {
+            if (which == 0) owner.remove(e.pkg); else owner.put(e.pkg, which);
+            if (owner.size() > 128) { Toast.makeText(this, R.string.library_save_failed, Toast.LENGTH_LONG).show(); return; }
+            PremiumPreferences.get(this).edit().putString("app_categories", new org.json.JSONObject(owner).toString()).apply(); filter(); d.dismiss();
+        }).setNegativeButton(android.R.string.cancel, null).show();
     }
     @Override protected void onDestroy() { main.removeCallbacksAndMessages(null); worker.shutdownNow(); icons.evictAll(); super.onDestroy(); }
 

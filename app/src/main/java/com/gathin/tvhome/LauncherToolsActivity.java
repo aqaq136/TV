@@ -39,6 +39,7 @@ public final class LauncherToolsActivity extends ToolsActivityBase {
         status = new TextView(this); status.setTextColor(0xFFC2DAFF); status.setTextSize(16); status.setPadding(0, dp(12), 0, dp(16));
         status.setText("Выберите действие. Онлайн-проверки запускаются только по вашему запросу."); rows.addView(status);
         row(rows, getString(R.string.center_title), () -> startActivity(new Intent(this, AppCenterActivity.class)));
+        row(rows, getString(R.string.visual_studio), () -> startActivity(new Intent(this, VisualSettingsActivity.class)));
         row(rows, getString(R.string.backup_title), () -> startActivity(new Intent(this, BackupActivity.class)));
         row(rows, getString(R.string.performance_title), this::performance);
         row(rows, getString(R.string.idle_title), this::idleClock);

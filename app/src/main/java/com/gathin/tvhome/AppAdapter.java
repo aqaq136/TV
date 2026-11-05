@@ -511,7 +511,8 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             float tileDensity = ctx.getResources().getDisplayMetrics().density;
             premiumTile.setCornerRadius(18f * tileDensity);
             premiumTile.setStroke(Math.round(tileDensity), 0x8868BCFF);
-            h.card.setBackground(premiumTile);
+            String surface = PremiumPreferences.get(ctx).getString("visual_tile_style", "glass");
+            h.card.setBackground(new PrismSurfaceDrawable(ambientColorAt(position), tileDensity, 18f * tileDensity, surface));
             h.card.setClipToOutline(true);
         }
         if (e.banner != null) {
@@ -687,6 +688,7 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     String packageAt(int position) {
         return position >= 0 && position < items.size() ? items.get(position).pkg : null;
     }
+    Drawable iconAt(int position) { return position >= 0 && position < items.size() ? items.get(position).icon : null; }
 
     /** The tile's artwork, its banner or else its icon, for the cinematic shelf's backdrop (HeroArt). */
     Drawable artworkAt(int position) {

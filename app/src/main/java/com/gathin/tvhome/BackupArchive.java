@@ -33,6 +33,8 @@ final class BackupArchive {
                 "safe_area", "tile_shape", "sound_move", "sound_click", "sound_volume", "history_enabled", "weather_city", "latitude", "longitude")));
         KEYS.put(LAUNCHER, new HashSet<>(Arrays.asList("columns", "rows_below_dock", "animations", "advanced_effects",
                 "dock_opacity", "clock_format", "home_idle_clock_minutes")));
+        KEYS.get(PREMIUM).addAll(Arrays.asList("visual_palette", "visual_scene", "visual_quality", "visual_motion", "visual_particles",
+                "visual_parallax", "visual_bloom", "visual_shimmer", "visual_widgets", "visual_tile_style", "visual_wallpaper_dim", "app_categories"));
     }
 
     static final class Data {
@@ -145,6 +147,15 @@ final class BackupArchive {
     private static boolean string(Object value, int max) { return value instanceof String && ((String) value).length() <= max && ((String) value).indexOf('\0') < 0; }
     static boolean valid(String key, Object value) {
         switch (key) {
+            case "visual_motion": case "visual_particles": case "visual_parallax": case "visual_bloom": case "visual_shimmer": case "visual_widgets": return value instanceof Boolean;
+            case "visual_palette": return value instanceof String && Arrays.asList(VisualPalette.NAMES).contains(value);
+            case "visual_scene": return oneOf(value, "aurora", "cosmos", "horizon");
+            case "visual_quality": return integer(value, 0, 2);
+            case "visual_tile_style": return oneOf(value, "glass", "neon", "solid");
+            case "visual_wallpaper_dim": return integer(value, 0, 90);
+            case "app_categories":
+                if (!string(value, 32768)) return false;
+                try { AppCategories.parse((String) value); return true; } catch (IllegalArgumentException e) { return false; }
             case "custom_wallpaper": case "large_text": case "sound_move": case "sound_click": case "history_enabled":
             case "animations": case "advanced_effects": return value instanceof Boolean;
             case "columns": return integer(value, 4, 7);

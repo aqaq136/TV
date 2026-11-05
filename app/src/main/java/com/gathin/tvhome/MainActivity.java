@@ -1107,6 +1107,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
                 break;
         }
         premiumHome.restoreFocusAfterLaunch();
+        premiumHome.resume();
         if (openLiveTvAfterBoot()) return;
         updateGreeting();
         updatePanel();
@@ -1290,6 +1291,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
 
     @Override
     protected void onPause() {
+        if (premiumHome != null) premiumHome.pause();
         if (launcherSounds != null) { launcherSounds.close(); launcherSounds = null; }
         super.onPause();
         resumed = false;
@@ -1364,6 +1366,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
 
     @Override
     protected void onDestroy() {
+        if (premiumHome != null) premiumHome.close();
         super.onDestroy();
         RemoteKeys.release(this);
         cancelHoldOk();
@@ -1789,6 +1792,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
 
     @Override
     public void onTileFocused(int position, View card) {
+        if (premiumHome != null) premiumHome.focused(adapter.labelAt(position), adapter.packageAt(position), adapter.iconAt(position), adapter.ambientColorAt(position), card);
         lastFocused = position;
         lastFocusedKey = adapter.keyAt(position);
         // Focus restored before the first layout (cold start): the tile has no size yet, and the glass
@@ -2411,6 +2415,10 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
 
     @Override
     public boolean onTileVerticalKey(int position, int keyCode) {
+        android.widget.LinearLayout quick = findViewById(R.id.visualQuickBar);
+        if (keyCode == KeyEvent.KEYCODE_DPAD_UP && !reordering && quick != null && quick.getChildCount() > 0 && (singleRow || position < COLUMNS)) {
+            quick.getChildAt(0).requestFocus(); return true;
+        }
         int count = adapter.appCount();
         android.widget.LinearLayout premiumFavorites = findViewById(R.id.erokhinFavorites);
         if (keyCode == KeyEvent.KEYCODE_DPAD_DOWN && premiumFavorites != null
