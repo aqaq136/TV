@@ -37,6 +37,15 @@ public class VisualHomeTest {
         assertTrue(folder.isDirectory() || folder.mkdirs());
         try (FileOutputStream out = new FileOutputStream(new File(folder, name + ".png"))) { assertTrue(bitmap.compress(Bitmap.CompressFormat.PNG, 100, out)); }
         finally { bitmap.recycle(); }
+        // UTP removes the tested application after the suite, including its external files directory.
+        // Keep test captures in the emulator's shared Download directory before that cleanup.
+        shell("mkdir -p /sdcard/Download/MetoxTV-preview");
+        shell("cp " + new File(folder, name + ".png").getAbsolutePath() + " /sdcard/Download/MetoxTV-preview/" + name + ".png");
+    }
+    private void shell(String command) throws Exception {
+        try (java.io.InputStream out = new android.os.ParcelFileDescriptor.AutoCloseInputStream(instrumentation.getUiAutomation().executeShellCommand(command))) {
+            byte[] buffer = new byte[1024]; while (out.read(buffer) != -1) { /* Drain to wait for completion. */ }
+        }
     }
     @Test public void homeRendersAndRemoteCanReachQuickActions() throws Exception {
         Activity home = start(MainActivity.class);
