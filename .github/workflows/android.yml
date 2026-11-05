@@ -2,7 +2,7 @@ name: Android checks
 
 on:
   push:
-    branches: [MetoxTV, metoxtv, 'codex/**']
+    branches: [MetoxTV, metoxtv]
   pull_request:
   workflow_dispatch:
 
