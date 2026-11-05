@@ -38,6 +38,13 @@ public final class LauncherToolsActivity extends ToolsActivityBase {
         TextView title = new TextView(this); title.setText("MetoxTV · Инструменты"); title.setTextColor(Color.WHITE); title.setTextSize(28); rows.addView(title);
         status = new TextView(this); status.setTextColor(0xFFC2DAFF); status.setTextSize(16); status.setPadding(0, dp(12), 0, dp(16));
         status.setText("Выберите действие. Онлайн-проверки запускаются только по вашему запросу."); rows.addView(status);
+        row(rows, getString(R.string.center_title), () -> startActivity(new Intent(this, AppCenterActivity.class)));
+        row(rows, getString(R.string.backup_title), () -> startActivity(new Intent(this, BackupActivity.class)));
+        row(rows, getString(R.string.performance_title), this::performance);
+        row(rows, getString(R.string.idle_title), this::idleClock);
+        row(rows, getString(R.string.history_title), this::history);
+        row(rows, getString(R.string.help_title), () -> new LauncherDialogBuilder(this).setTitle(R.string.help_title)
+                .setMessage(R.string.help_body).setPositiveButton(android.R.string.ok, null).show());
         row(rows, "Установить APK с флешки", this::pickApk);
         row(rows, "Удалить приложение…", this::chooseUninstall);
         row(rows, "Форма плиток", this::chooseShape);
@@ -73,6 +80,43 @@ public final class LauncherToolsActivity extends ToolsActivityBase {
         view.setOnClickListener(v -> action.run());
     }
     private void message(String text) { Toast.makeText(this, text, Toast.LENGTH_LONG).show(); }
+    private void performance() {
+        android.content.SharedPreferences p = getSharedPreferences(Config.SETTINGS_NAME, MODE_PRIVATE);
+        Config current = Config.load(this);
+        int selected = !current.animations ? 0 : current.advancedEffects ? 2 : 1;
+        new LauncherDialogBuilder(this).setTitle(R.string.performance_title)
+                .setSingleChoiceItems(getResources().getStringArray(R.array.performance_choices), selected, (d, which) -> {
+                    p.edit().putBoolean("animations", which > 0).putBoolean("advanced_effects", which == 2).apply();
+                    PremiumPreferences.changed(this); d.dismiss(); status.setText(R.string.performance_saved);
+                }).setNegativeButton(android.R.string.cancel, null).show();
+    }
+    private void idleClock() {
+        int[] minutes = {0, 2, 5, 10, 15, 30};
+        int current = Config.load(this).homeIdleClockMinutes;
+        String[] labels = new String[minutes.length]; int selected = -1;
+        for (int i = 0; i < minutes.length; i++) {
+            labels[i] = i == 0 ? getString(R.string.off) : getString(R.string.idle_minutes, minutes[i]);
+            if (minutes[i] == current) selected = i;
+        }
+        new LauncherDialogBuilder(this).setTitle(R.string.idle_title).setSingleChoiceItems(labels, selected, (d, which) -> {
+            getSharedPreferences(Config.SETTINGS_NAME, MODE_PRIVATE).edit().putInt("home_idle_clock_minutes", minutes[which]).apply();
+            PremiumPreferences.changed(this); d.dismiss(); status.setText(R.string.idle_saved);
+        }).setNegativeButton(android.R.string.cancel, null).show();
+    }
+    private void history() {
+        android.content.SharedPreferences p = PremiumPreferences.get(this);
+        boolean enabled = p.getBoolean("history_enabled", true);
+        new LauncherDialogBuilder(this).setTitle(R.string.history_title)
+                .setItems(new String[]{getString(enabled ? R.string.history_disable : R.string.history_enable), getString(R.string.history_clear)}, (d, which) -> {
+                    if (which == 0) {
+                        p.edit().putBoolean("history_enabled", !enabled).apply();
+                        status.setText(enabled ? R.string.history_disabled : R.string.history_enabled);
+                    } else new LauncherDialogBuilder(this).setTitle(R.string.history_clear)
+                            .setMessage(R.string.history_clear_confirm).setPositiveButton(R.string.history_clear, (dialog, button) -> {
+                                LastOpened.clear(this); status.setText(R.string.history_cleared);
+                            }).setNegativeButton(android.R.string.cancel, null).show();
+                }).setNegativeButton(android.R.string.cancel, null).show();
+    }
     private interface Work { void run(ToolNetwork net) throws Exception; }
     private synchronized void cancel() {
         if (task != null) task.cancel(true);

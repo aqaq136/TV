@@ -7,6 +7,9 @@ import android.view.KeyEvent;
 /** Applies sound choices to the native launcher settings screens too. */
 abstract class ToolsActivityBase extends Activity {
     private LauncherSounds sounds;
+    @Override protected void attachBaseContext(android.content.Context base) {
+        super.attachBaseContext(LauncherLocale.wrap(base));
+    }
     @Override protected void onResume() {
         super.onResume();
         sounds = new LauncherSounds(this);

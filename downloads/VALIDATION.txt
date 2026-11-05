@@ -1,0 +1,12 @@
+MetoxTV 3.5.0 / versionCode 16
+Build date: 2026-11-05
+Package: com.gathin.tvhome
+Variant: release, R8 and resource shrinking enabled
+Minimum Android: 8.0 / API 26
+Main APK bytes: 648037
+Signing certificate SHA-256: 93501fa37f2e7fdd48d16e5b29a85fe1a3a67095e21c1558aba5c8c2239927b2
+Certificate matches previously published MetoxTV 3.4.1: yes
+Unit tests: 344; failures 0; errors 0; skipped 0
+Android Lint release: errors 0; warnings 135
+Build: :app:assembleRelease :app:testDebugUnitTest :app:lintRelease :efir-tv:assembleDebug
+Physical TV / emulator testing for 3.5.0: not performed

@@ -11,7 +11,7 @@ if errorlevel 1 (
 )
 echo Connected devices:
 "%ADB%" devices
-echo Installing MetoxTV 3.4.1 without deleting settings...
+echo Installing MetoxTV 3.5.0 without deleting settings...
 "%ADB%" install -r "MetoxTV.apk"
 if errorlevel 1 (
  echo Installation failed. See INSTALL_RU.txt. Signature conflicts require a manual decision.
@@ -21,7 +21,7 @@ if errorlevel 1 (
 )
 "%ADB%" shell am start -n com.gathin.tvhome/.MainActivity
 if errorlevel 1 (
- echo Installed, but could not launch. Open ErokhinTV from the TV app list.
+ echo Installed, but could not launch. Open MetoxTV from the TV app list.
  pause
  exit /b 1
 )
